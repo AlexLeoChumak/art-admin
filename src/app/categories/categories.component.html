@@ -4,12 +4,18 @@
       <h3 class="text-center text-theme-primary">New Categories</h3>
       <p class="text-center mb-5">You can add new categoriesfrom here...</p>
 
-      <form class="form-inline text-center">
+      <form
+        #categoryForm="ngForm"
+        (ngSubmit)="onSubmit(categoryForm)"
+        class="form-inline text-center"
+      >
         <div class="form-group col-md-10">
           <input
             type="text"
             placeholder="Add new category..."
             class="form-control shadow-effect"
+            name="category"
+            ngModel
           />
         </div>
 

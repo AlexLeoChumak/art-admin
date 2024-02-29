@@ -1,16 +1,7 @@
 import { Component } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import {
-  Firestore,
-  collectionData,
-  collection,
-  addDoc,
-  DocumentReference,
-  doc,
-  DocumentSnapshot,
-} from '@angular/fire/firestore';
-import { DocumentData } from 'firebase/firestore/lite';
-import { Observable } from 'rxjs';
+import { CategoriesService } from '../services/categories.service';
+import { Category } from '../models/category';
 
 @Component({
   selector: 'app-categories',
@@ -18,27 +9,18 @@ import { Observable } from 'rxjs';
   styleUrls: ['./categories.component.scss'],
 })
 export class CategoriesComponent {
-  constructor(private fs: Firestore) {}
+  data: any;
 
-  async onSubmit(
-    formData: NgForm
-  ): Promise<DocumentReference<any, DocumentData> | undefined> {
-    const categoryData = { ...formData.value };
+  constructor(private categoriesService: CategoriesService) {}
 
-    try {
-      const collectionRef = collection(this.fs, 'categories');
-      return await addDoc(collectionRef, categoryData);
+  async onSubmit(formData: NgForm) {
+    const categoryData: Category = { ...formData.value };
 
-      // const resID = doc(this.fs, 'categories', res1.id);
-      // console.log('resID', resID);
+    this.categoriesService.saveData(categoryData).subscribe((res) => {
+      console.log('saveDataObservable', res);
+    });
 
-      // const categCollection = collection(this.fs, 'categories');
-      // collectionData(categCollection).subscribe((items) => {
-      //   console.log('items', items);
-      // });
-    } catch (error) {
-      console.log(error);
-      return undefined;
-    }
+    // const response = await this.categoriesService.saveData(categoryData);
+    // console.log('saveData', response);
   }
 }

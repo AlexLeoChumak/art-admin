@@ -6,26 +6,57 @@ import {
   doc,
   getDoc,
   DocumentReference,
+  collectionChanges,
+  docSnapshots,
+  DocumentSnapshot,
+  query,
+  where,
+  onSnapshot,
 } from '@angular/fire/firestore';
-import { Category } from '../models/category';
-import { Observable, from, catchError, of, map } from 'rxjs';
-import { DocumentSnapshot } from 'firebase/firestore/lite';
+import { Category, CategoryWithId } from '../models/category';
+import { Observable, from, catchError, of, map, tap, throwError } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CategoriesService {
-  constructor(private fs: Firestore) {}
+  constructor(private fs: Firestore, private toastr: ToastrService) {}
 
   saveData(data: Category): Observable<DocumentReference<any> | null> {
     const collectionRef = collection(this.fs, 'categories');
 
     return from(addDoc(collectionRef, data)).pipe(
+      tap(() => this.toastr.success('Data insert successfully')),
       catchError((error) => {
         console.error('Error saving data:', error);
         return of(null);
       })
     );
+  }
+
+  loadData(): Observable<any> {
+    const collectionRef = collection(this.fs, 'categories');
+
+    return new Observable((observer) => {
+      const unsubscribe = onSnapshot(
+        collectionRef,
+        (snapshot) => {
+          const data = snapshot.docs.map((docSnapshot) => {
+            const data = docSnapshot.data();
+            const id = docSnapshot.id;
+            console.log('******', data, id);
+
+            return data ? { id, ...data } : null;
+          });
+          observer.next(data);
+        },
+        (error) => observer.error(error)
+      );
+
+      // Вернуть функцию отписки, которая будет вызвана при уничтожении Observable
+      return unsubscribe;
+    });
   }
 
   getDocumentById(docId: string): Observable<any> {
@@ -45,25 +76,4 @@ export class CategoriesService {
       })
     );
   }
-
-  // async saveData(data: Category) {
-  //   try {
-  //     const collectionRef = collection(this.fs, 'categories');
-  //     return await addDoc(collectionRef, data);
-  //   } catch (error) {
-  //     console.log(error);
-  //     return null;
-  //   }
-  // }
-
-  // async getDocumentById(docId: string) {
-  //   const docRef = doc(this.fs, 'categories', docId);
-  //   const docSnap = await getDoc(docRef);
-
-  //   if (docSnap.exists()) {
-  //     return docSnap.data();
-  //   } else {
-  //     return null;
-  //   }
-  // }
 }

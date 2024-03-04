@@ -1,78 +1,87 @@
 import { Injectable } from '@angular/core';
 import {
+  Observable,
+  from,
+  catchError,
+  of,
+  finalize,
+  Subscriber,
+  throwError,
+} from 'rxjs';
+import {
   Firestore,
   collection,
   addDoc,
   doc,
-  getDoc,
   DocumentReference,
-  collectionChanges,
-  docSnapshots,
   DocumentSnapshot,
-  query,
-  where,
   onSnapshot,
+  updateDoc,
+  deleteDoc,
 } from '@angular/fire/firestore';
-import { Category, CategoryWithId } from '../models/category';
-import { Observable, from, catchError, of, map, tap, throwError } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
+import { Category } from '../models/category';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CategoriesService {
-  constructor(private fs: Firestore, private toastr: ToastrService) {}
+  categoriesCollection = collection(this.fs, 'categories');
 
-  saveData(data: Category): Observable<DocumentReference<any> | null> {
-    const collectionRef = collection(this.fs, 'categories');
+  constructor(private fs: Firestore) {}
 
-    return from(addDoc(collectionRef, data)).pipe(
-      tap(() => this.toastr.success('Data insert successfully')),
-      catchError((error) => {
-        console.error('Error saving data:', error);
-        return of(null);
-      })
-    );
-  }
+  loadData(): Observable<Category[]> {
+    let unsubscribe: () => void;
 
-  loadData(): Observable<any> {
-    const collectionRef = collection(this.fs, 'categories');
-
-    return new Observable((observer) => {
-      const unsubscribe = onSnapshot(
-        collectionRef,
+    return new Observable((observer: Subscriber<Category[]>) => {
+      unsubscribe = onSnapshot(
+        this.categoriesCollection,
         (snapshot) => {
-          const data = snapshot.docs.map((docSnapshot) => {
-            const data = docSnapshot.data();
-            const id = docSnapshot.id;
-            console.log('******', data, id);
+          const data = snapshot.docs.map(
+            (docSnapshot: DocumentSnapshot<any>) => {
+              const data = docSnapshot.data();
+              const id = docSnapshot.id;
 
-            return data ? { id, ...data } : null;
-          });
+              return data ? { id, ...data } : null;
+            }
+          );
           observer.next(data);
         },
         (error) => observer.error(error)
       );
-
-      // Вернуть функцию отписки, которая будет вызвана при уничтожении Observable
-      return unsubscribe;
-    });
+    }).pipe(
+      finalize(() => {
+        if (unsubscribe) {
+          unsubscribe();
+        }
+      })
+    );
   }
 
-  getDocumentById(docId: string): Observable<any> {
-    const docRef = doc(this.fs, 'categories', docId);
-
-    return from(getDoc(docRef)).pipe(
-      map((docSnap: DocumentSnapshot<any>) => {
-        if (docSnap.exists()) {
-          return docSnap.data();
-        } else {
-          return null;
-        }
-      }),
+  saveData(data: Category): Observable<DocumentReference<any> | null> {
+    return from(addDoc(this.categoriesCollection, data)).pipe(
       catchError((error) => {
-        console.error('Error getting document:', error);
-        return of(null);
+        console.error('Error saving data:', error);
+        return throwError(() => null);
+      })
+    );
+  }
+
+  updateData(id: string, editData: string): Observable<void | null> {
+    return from(
+      updateDoc(doc(this.categoriesCollection, id), { category: editData })
+    ).pipe(
+      catchError((error) => {
+        console.error('Error updating document: ', error);
+        return throwError(() => null);
+      })
+    );
+  }
+
+  deleteData(id: string): Observable<void | null> {
+    return from(deleteDoc(doc(this.categoriesCollection, id))).pipe(
+      catchError((error) => {
+        console.error('Error delete document: ', error);
+        return throwError(() => null);
       })
     );
   }

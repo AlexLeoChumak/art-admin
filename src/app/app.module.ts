@@ -2,6 +2,9 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { ReactiveFormsModule } from '@angular/forms';
+import { AngularEditorModule } from '@kolkov/angular-editor';
 
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
@@ -32,9 +35,12 @@ import { NewPostComponent } from './posts/new-post/new-post.component';
     BrowserAnimationsModule,
     AppRoutingModule,
     FormsModule,
+    HttpClientModule,
+    ReactiveFormsModule,
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideFirestore(() => getFirestore()),
     ToastrModule.forRoot(),
+    AngularEditorModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

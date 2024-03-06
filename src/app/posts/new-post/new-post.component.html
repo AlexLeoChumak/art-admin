@@ -17,7 +17,7 @@
                 formControlName="title"
                 type="text"
                 class="form-control"
-                (keyup)="onTitleChanged($event)"
+                (keyup)="updatePermalink($event)"
                 [ngClass]="{
                   'is-invalid': fc['title'].touched && fc['title'].invalid
                 }"
@@ -47,7 +47,6 @@
                 formControlName="permalink"
                 type="text"
                 class="form-control"
-                [(ngModel)]="permalink"
                 name="permalink"
                 [ngClass]="{
                   'is-invalid':
@@ -109,7 +108,10 @@
             }"
           >
             <option disabled>Please select a category</option>
-            <option *ngFor="let category of categoryArray">
+            <option
+              *ngFor="let category of categoryArray"
+              value="{{ category.id }}-{{ category.category }}"
+            >
               {{ category.category }}
             </option>
           </select>
@@ -128,23 +130,23 @@
           <label>Post image</label>
           <img
             [src]="imgSrc"
-            [alt]="permalink"
+            [alt]="postForm.value.title"
             class="form-control img-fluid img-preview"
           />
           <input
-            formControlName="postImg"
+            formControlName="postImgUrl"
             type="file"
             class="form-control"
             accept="image/*"
             (change)="showPreview($event)"
             [ngClass]="{
-              'is-invalid': fc['postImg'].touched && fc['postImg'].invalid
+              'is-invalid': fc['postImgUrl'].touched && fc['postImgUrl'].invalid
             }"
           />
 
-          <div *ngIf="fc['postImg'].errors?.['required']">
+          <div *ngIf="fc['postImgUrl'].errors?.['required']">
             <div
-              *ngIf="fc['postImg'].touched && fc['postImg'].invalid"
+              *ngIf="fc['postImgUrl'].touched && fc['postImgUrl'].invalid"
               class="alert alert-danger"
             >
               Please select a image

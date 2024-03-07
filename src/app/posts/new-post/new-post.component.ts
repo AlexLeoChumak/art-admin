@@ -1,11 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { EMPTY, Subscription, catchError, switchMap } from 'rxjs';
 
 import { CategoriesService } from 'src/app/services/categories.service';
 import { Category } from 'src/app/models/category';
 import { Post } from 'src/app/models/post';
 import { PostsService } from 'src/app/services/posts.service';
+import { ToastrService } from 'ngx-toastr';
+import { ActivatedRoute, Params } from '@angular/router';
 
 @Component({
   selector: 'app-new-post',
@@ -17,13 +19,18 @@ export class NewPostComponent implements OnInit, OnDestroy {
   selectedImg: any;
   lSub!: Subscription;
   uSub!: Subscription;
+  qSub!: Subscription;
+  pSub!: Subscription;
   categoryArray: Category[] = [];
   postForm!: FormGroup;
+  post!: any;
 
   constructor(
     private categoriesService: CategoriesService,
     private fb: FormBuilder,
-    private postsService: PostsService
+    private postsService: PostsService,
+    private toastr: ToastrService,
+    private route: ActivatedRoute
   ) {
     this.postForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(5)]],
@@ -38,6 +45,39 @@ export class NewPostComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.lSub = this.categoriesService.loadData().subscribe((arr) => {
       arr ? (this.categoryArray = arr) : (this.categoryArray = []);
+    });
+
+    this.qSub = this.route.queryParams.subscribe((params: Params) => {
+      if (Object.keys(params).length === 0) {
+        return;
+      }
+
+      this.pSub = this.postsService
+        .loadOnePost(params['id'])
+        .subscribe((post) => {
+          this.post = post;
+
+          this.postForm = this.fb.group({
+            title: [
+              this.post.title,
+              [Validators.required, Validators.minLength(5)],
+            ],
+            permalink: [this.post.permalink, [Validators.required]],
+            excerpt: [
+              this.post.excerpt,
+              [Validators.required, Validators.minLength(10)],
+            ],
+            category: [
+              `${this.post.category.categoryId}-${this.post.category.category}`,
+              [Validators.required],
+            ],
+            postImgUrl: ['', [Validators.required]],
+            content: [this.post.content, [Validators.required]],
+          });
+
+          this.imgSrc = this.post.postImgUrl;
+          //7.03.55
+        });
     });
   }
 
@@ -61,6 +101,10 @@ export class NewPostComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
+    if (this.postForm.invalid) {
+      return;
+    }
+
     const splitted = this.postForm.value.category.split('-');
 
     const postData: Post = {
@@ -72,13 +116,25 @@ export class NewPostComponent implements OnInit, OnDestroy {
       isFeatured: false,
       views: 0,
       status: 'new',
-      createdAt: new Date(),
+      createdAt: new Date().getTime(),
     };
 
     this.uSub = this.postsService
-      .uploadImageAndUpdatePostAndSavePost(this.selectedImg, postData)
+      .uploadImageAndUpdatePost(this.selectedImg, postData)
+      .pipe(
+        switchMap((post) => {
+          return this.postsService.savePostToCollection(post);
+        }),
+        catchError((err) => {
+          console.error(`Component error: ${err}`);
+          this.toastr.error(err);
+          return EMPTY;
+        })
+      )
       .subscribe(() => {
-        console.log('NewPostComponent пост загружен');
+        this.postForm.reset();
+        this.toastr.success('Data insert successfully');
+        this.imgSrc = './assets/placeholder-image.webp';
       });
   }
 
@@ -90,6 +146,14 @@ export class NewPostComponent implements OnInit, OnDestroy {
     if (this.uSub) {
       this.uSub.unsubscribe();
       console.log('uSub отписан');
+    }
+    if (this.qSub) {
+      this.qSub.unsubscribe();
+      console.log('qSub отписан');
+    }
+    if (this.pSub) {
+      this.pSub.unsubscribe();
+      console.log('pSub отписан');
     }
   }
 }

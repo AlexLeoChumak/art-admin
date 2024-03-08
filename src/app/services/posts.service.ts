@@ -12,14 +12,14 @@ import {
   DocumentData,
   DocumentSnapshot,
   Firestore,
+  FirestoreError,
   addDoc,
   collection,
   doc,
-  getDoc,
   onSnapshot,
+  updateDoc,
 } from '@angular/fire/firestore';
 import { DocumentReference } from 'firebase/firestore/lite';
-import { Params, Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -28,7 +28,7 @@ export class PostsService {
   storage = getStorage();
   categoriesCollection = collection(this.fs, 'posts');
 
-  constructor(private fs: Firestore, private router: Router) {}
+  constructor(private fs: Firestore) {}
 
   loadPosts(): Observable<Post[]> {
     // метод загружает все посты из коллекции Firestore
@@ -61,22 +61,31 @@ export class PostsService {
 
   uploadImageAndUpdatePost(
     // метод загружает изображение в коллекцию Storage, получает его URL, и апдейтит пост, который и возвращает
-    selectedImage: any,
-    postData: Post
+    selectedImage: Blob | Uint8Array | ArrayBuffer,
+    postData: Post,
+    formStatus: string,
+    id: string
   ): Observable<Post> {
     const filePath = `postImg/${Date.now()}`;
     const storageRef = ref(this.storage, filePath);
 
     return from(uploadBytes(storageRef, selectedImage)).pipe(
       switchMap(() => getDownloadURL(storageRef)),
-      tap((url) => {
+      switchMap((url) => {
         postData.postImgUrl = url;
+
+        if (formStatus === 'Edit') {
+          return this.updatePostToCollection(id, postData);
+        } else {
+          return this.savePostToCollection(postData);
+        }
       }),
       map(() => postData),
-      catchError((err) => {
-        console.error(`Error: ${err}`);
+      catchError((error) => {
+        console.error(`Error: ${error}`);
         return throwError(
-          () => 'An error occurred while saving data. Please try again.'
+          () =>
+            new Error('An error occured while saving data. Please try again.')
         );
       })
     );
@@ -85,7 +94,6 @@ export class PostsService {
   savePostToCollection(postData: Post): Observable<string | DocumentReference> {
     // метод сохраняет пост в коллекцию Firestore
     return from(addDoc(this.categoriesCollection, postData)).pipe(
-      tap(() => this.router.navigate(['/posts'])),
       catchError((err) => {
         console.error(`Error: ${err}`);
         return throwError(
@@ -95,14 +103,30 @@ export class PostsService {
     );
   }
 
-  loadOnePost(id: Params): Observable<DocumentData> {
+  loadOnePost(id: string): Observable<DocumentData> {
     // метод получает документ из Firestore по id
     const docRef = doc(this.fs, `posts/${id}`);
 
     return new Observable((subscriber: Subscriber<DocumentData>) => {
-      onSnapshot(docRef, (doc) => {
-        subscriber.next(doc.data());
-      });
+      onSnapshot(
+        docRef,
+        (doc) => {
+          subscriber.next(doc.data());
+        },
+        (error: FirestoreError) => {
+          subscriber.error(error);
+        }
+      );
     });
+  }
+
+  updatePostToCollection(id: string, editedPost: any) {
+    // метод обновляет документ в Firestore
+    return from(updateDoc(doc(this.categoriesCollection, id), editedPost)).pipe(
+      catchError((error) => {
+        console.error('Error updating document: ', error);
+        return throwError(() => null);
+      })
+    );
   }
 }

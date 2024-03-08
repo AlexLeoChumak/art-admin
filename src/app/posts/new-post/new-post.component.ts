@@ -1,13 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { EMPTY, Subscription, catchError, switchMap } from 'rxjs';
+import { EMPTY, Subscription, catchError, of } from 'rxjs';
 
 import { CategoriesService } from 'src/app/services/categories.service';
 import { Category } from 'src/app/models/category';
 import { Post } from 'src/app/models/post';
 import { PostsService } from 'src/app/services/posts.service';
 import { ToastrService } from 'ngx-toastr';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 
 @Component({
   selector: 'app-new-post',
@@ -17,19 +17,23 @@ import { ActivatedRoute, Params } from '@angular/router';
 export class NewPostComponent implements OnInit, OnDestroy {
   imgSrc: any = './assets/placeholder-image.webp';
   selectedImg: any;
-  lSub!: Subscription;
-  uSub!: Subscription;
-  qSub!: Subscription;
-  pSub!: Subscription;
   categoryArray: Category[] = [];
   postForm!: FormGroup;
   post!: any;
+  formStatus: string = 'Add New';
+  postId!: string;
+
+  private lSub!: Subscription;
+  private uSub!: Subscription;
+  private qSub!: Subscription;
+  private pSub!: Subscription;
 
   constructor(
     private categoriesService: CategoriesService,
     private fb: FormBuilder,
     private postsService: PostsService,
     private toastr: ToastrService,
+    private router: Router,
     private route: ActivatedRoute
   ) {
     this.postForm = this.fb.group({
@@ -43,42 +47,65 @@ export class NewPostComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.lSub = this.categoriesService.loadData().subscribe((arr) => {
-      arr ? (this.categoryArray = arr) : (this.categoryArray = []);
-    });
+    this.lSub = this.categoriesService
+      .loadData()
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading data: ', error);
+          return of([]);
+        })
+      )
+      .subscribe((arr) => {
+        arr ? (this.categoryArray = arr) : null;
+      });
 
-    this.qSub = this.route.queryParams.subscribe((params: Params) => {
-      if (Object.keys(params).length === 0) {
-        return;
-      }
+    this.qSub = this.route.queryParams
+      .pipe(
+        catchError((error) => {
+          console.error('Error getting query parameters: ', error);
+          return of({});
+        })
+      )
+      .subscribe((params: Params) => {
+        if (Object.keys(params).length === 0) {
+          return;
+        }
 
-      this.pSub = this.postsService
-        .loadOnePost(params['id'])
-        .subscribe((post) => {
-          this.post = post;
+        this.postId = params['id'];
 
-          this.postForm = this.fb.group({
-            title: [
-              this.post.title,
-              [Validators.required, Validators.minLength(5)],
-            ],
-            permalink: [this.post.permalink, [Validators.required]],
-            excerpt: [
-              this.post.excerpt,
-              [Validators.required, Validators.minLength(10)],
-            ],
-            category: [
-              `${this.post.category.categoryId}-${this.post.category.category}`,
-              [Validators.required],
-            ],
-            postImgUrl: ['', [Validators.required]],
-            content: [this.post.content, [Validators.required]],
+        this.pSub = this.postsService
+          .loadOnePost(this.postId)
+          .pipe(
+            catchError((error) => {
+              console.error('Error loading data: ', error);
+              return of({});
+            })
+          )
+          .subscribe((post) => {
+            this.post = post;
+
+            this.postForm = this.fb.group({
+              title: [
+                this.post.title,
+                [Validators.required, Validators.minLength(5)],
+              ],
+              permalink: [this.post.permalink, [Validators.required]],
+              excerpt: [
+                this.post.excerpt,
+                [Validators.required, Validators.minLength(10)],
+              ],
+              category: [
+                `${this.post.category.categoryId}-${this.post.category.category}`,
+                [Validators.required],
+              ],
+              postImgUrl: ['', [Validators.required]],
+              content: [this.post.content, [Validators.required]],
+            });
+
+            this.imgSrc = this.post.postImgUrl;
+            this.formStatus = 'Edit';
           });
-
-          this.imgSrc = this.post.postImgUrl;
-          //7.03.55
-        });
-    });
+      });
   }
 
   get fc() {
@@ -120,21 +147,22 @@ export class NewPostComponent implements OnInit, OnDestroy {
     };
 
     this.uSub = this.postsService
-      .uploadImageAndUpdatePost(this.selectedImg, postData)
+      .uploadImageAndUpdatePost(
+        this.selectedImg,
+        postData,
+        this.formStatus,
+        this.postId
+      )
       .pipe(
-        switchMap((post) => {
-          return this.postsService.savePostToCollection(post);
-        }),
-        catchError((err) => {
-          console.error(`Component error: ${err}`);
-          this.toastr.error(err);
-          return EMPTY;
+        catchError((error) => {
+          console.error('Error insert data: ', error);
+          this.toastr.error(error);
+          return of({});
         })
       )
       .subscribe(() => {
-        this.postForm.reset();
-        this.toastr.success('Data insert successfully');
-        this.imgSrc = './assets/placeholder-image.webp';
+        this.toastr.success('Data insert successfully'),
+          this.router.navigate(['/posts']);
       });
   }
 

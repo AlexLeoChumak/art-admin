@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError, of } from 'rxjs';
 import { Post } from 'src/app/models/post';
 import { PostsService } from 'src/app/services/posts.service';
 
@@ -9,16 +9,23 @@ import { PostsService } from 'src/app/services/posts.service';
   styleUrls: ['./all-post.component.scss'],
 })
 export class AllPostComponent implements OnInit, OnDestroy {
-  lSub!: Subscription;
+  private lSub!: Subscription;
   postsArray: Post[] = [];
 
   constructor(private postService: PostsService) {}
 
   ngOnInit(): void {
-    this.lSub = this.postService.loadPosts().subscribe((data: Post[]) => {
-      console.log(data);
-      this.postsArray = data;
-    });
+    this.lSub = this.postService
+      .loadPosts()
+      .pipe(
+        catchError((error) => {
+          console.error('Error loading data: ', error);
+          return of([]);
+        })
+      )
+      .subscribe((data: Post[]) => {
+        data ? (this.postsArray = data) : null;
+      });
   }
 
   ngOnDestroy(): void {

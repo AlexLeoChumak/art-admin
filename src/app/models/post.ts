@@ -11,5 +11,5 @@ export interface Post {
   views: number;
   status: string;
   createdAt: Date;
-  id?: string;
+  id: string;
 }

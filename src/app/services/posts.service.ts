@@ -5,7 +5,7 @@ import {
   uploadBytes,
   getDownloadURL,
 } from '@angular/fire/storage';
-import { from, Observable, Subscriber, throwError } from 'rxjs';
+import { from, Observable, Subscriber, Subscription, throwError } from 'rxjs';
 import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
 import { Post } from '../models/post';
 import {
@@ -15,7 +15,10 @@ import {
   FirestoreError,
   addDoc,
   collection,
+  deleteDoc,
   doc,
+  getDoc,
+  getDocs,
   onSnapshot,
   updateDoc,
 } from '@angular/fire/firestore';
@@ -48,7 +51,12 @@ export class PostsService {
           );
           observer.next(data);
         },
-        (error) => observer.error(error)
+        (err: FirestoreError) => {
+          console.error(`Error: ${err}`);
+          observer.error(
+            `An error occurred while loading data. Please try again`
+          );
+        }
       );
     }).pipe(
       finalize(() => {
@@ -81,12 +89,9 @@ export class PostsService {
         }
       }),
       map(() => postData),
-      catchError((error) => {
-        console.error(`Error: ${error}`);
-        return throwError(
-          () =>
-            new Error('An error occured while saving data. Please try again.')
-        );
+      catchError((err: FirestoreError) => {
+        console.error(`Error: ${err}`);
+        return throwError(() => `Data insert error. Please try again`);
       })
     );
   }
@@ -94,38 +99,48 @@ export class PostsService {
   savePostToCollection(postData: Post): Observable<string | DocumentReference> {
     // метод сохраняет пост в коллекцию Firestore
     return from(addDoc(this.categoriesCollection, postData)).pipe(
-      catchError((err) => {
+      catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
-        return throwError(
-          () => 'An error occurred while saving data. Please try again.'
-        );
+        return throwError(() => `Data insert error. Please try again`);
       })
     );
   }
 
   loadOnePost(id: string): Observable<DocumentData> {
     // метод получает документ из Firestore по id
-    const docRef = doc(this.fs, `posts/${id}`);
 
-    return new Observable((subscriber: Subscriber<DocumentData>) => {
-      onSnapshot(
-        docRef,
-        (doc) => {
-          subscriber.next(doc.data());
-        },
-        (error: FirestoreError) => {
-          subscriber.error(error);
+    return from(getDoc(doc(this.fs, `posts/${id}`))).pipe(
+      map((docSnapshot) => {
+        const data = docSnapshot.data();
+
+        if (!data) {
+          return throwError(() => `No data`);
         }
-      );
-    });
+        return data;
+      }),
+      catchError((err: FirestoreError) => {
+        console.error(`Error: ${err}`);
+        return throwError(() => `Data getting error. Please try again`);
+      })
+    );
   }
 
   updatePostToCollection(id: string, editedPost: any) {
     // метод обновляет документ в Firestore
     return from(updateDoc(doc(this.categoriesCollection, id), editedPost)).pipe(
-      catchError((error) => {
-        console.error('Error updating document: ', error);
-        return throwError(() => null);
+      catchError((err: FirestoreError) => {
+        console.error(`Error: ${err}`);
+        return throwError(() => `Data update error. Please try again`);
+      })
+    );
+  }
+
+  deletePost(id: string) {
+    // метод удаляет документ из Firestore
+    return from(deleteDoc(doc(this.categoriesCollection, id))).pipe(
+      catchError((err: FirestoreError) => {
+        console.error(`Error: ${err}`);
+        return throwError(() => `Data delete error. Please try again`);
       })
     );
   }

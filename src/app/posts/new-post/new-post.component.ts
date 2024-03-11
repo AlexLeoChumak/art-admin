@@ -169,19 +169,15 @@ export class NewPostComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.lSub) {
       this.lSub.unsubscribe();
-      console.log('lSub отписан');
     }
     if (this.uSub) {
       this.uSub.unsubscribe();
-      console.log('uSub отписан');
     }
     if (this.qSub) {
       this.qSub.unsubscribe();
-      console.log('qSub отписан');
     }
     if (this.pSub) {
       this.pSub.unsubscribe();
-      console.log('pSub отписан');
     }
   }
 }

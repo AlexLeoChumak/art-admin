@@ -39,6 +39,7 @@
 
         <div class="col-md-2">
           <button
+            type="submit"
             [disabled]="categoryForm.invalid"
             class="btn btn-block btn-info mb-2 btn-theme"
           >
@@ -52,7 +53,9 @@
   <div class="row mt-5 mb-5">
     <div class="col-md-3"></div>
 
-    <h5 *ngIf="loading; else content" class="text-center w-100">Loading...</h5>
+    <div *ngIf="loading; else content" class="text-center w-100">
+      <span>Loading...</span>
+    </div>
     <ng-template #content>
       <div
         *ngIf="categoryArray.length; else noData"
@@ -93,7 +96,7 @@
         </div>
       </div>
       <ng-template #noData>
-        <h5 class="text-center w-100">No data</h5>
+        <div class="text-center w-100"><span>No data</span></div>
       </ng-template>
     </ng-template>
     <div class="col-md-3"></div>

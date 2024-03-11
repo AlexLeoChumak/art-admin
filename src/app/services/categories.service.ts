@@ -3,10 +3,9 @@ import {
   Observable,
   from,
   catchError,
-  of,
-  finalize,
   Subscriber,
   throwError,
+  finalize,
 } from 'rxjs';
 import {
   Firestore,
@@ -18,6 +17,7 @@ import {
   onSnapshot,
   updateDoc,
   deleteDoc,
+  FirestoreError,
 } from '@angular/fire/firestore';
 import { Category } from '../models/category';
 
@@ -30,6 +30,7 @@ export class CategoriesService {
   constructor(private fs: Firestore) {}
 
   loadData(): Observable<Category[]> {
+    // метод загружает все посты из коллекции Firestore
     let unsubscribe: () => void;
 
     return new Observable((observer: Subscriber<Category[]>) => {
@@ -46,7 +47,12 @@ export class CategoriesService {
           );
           observer.next(data);
         },
-        (error) => observer.error(error)
+        (err: FirestoreError) => {
+          console.error(`Error: ${err}`);
+          observer.error(
+            `An error occurred while loading data. Please try again`
+          );
+        }
       );
     }).pipe(
       finalize(() => {
@@ -59,9 +65,9 @@ export class CategoriesService {
 
   saveData(data: Category): Observable<DocumentReference<any> | null> {
     return from(addDoc(this.categoriesCollection, data)).pipe(
-      catchError((error) => {
-        console.error('Error saving data:', error);
-        return throwError(() => null);
+      catchError((err: FirestoreError) => {
+        console.error(`Error: ${err}`);
+        return throwError(() => `Data insert error. Please try again`);
       })
     );
   }
@@ -70,18 +76,18 @@ export class CategoriesService {
     return from(
       updateDoc(doc(this.categoriesCollection, id), { category: editData })
     ).pipe(
-      catchError((error) => {
-        console.error('Error updating document: ', error);
-        return throwError(() => null);
+      catchError((err: FirestoreError) => {
+        console.error(`Error: ${err}`);
+        return throwError(() => `Data update error. Please try again`);
       })
     );
   }
 
   deleteData(id: string): Observable<void | null> {
     return from(deleteDoc(doc(this.categoriesCollection, id))).pipe(
-      catchError((error) => {
-        console.error('Error delete document: ', error);
-        return throwError(() => null);
+      catchError((err: FirestoreError) => {
+        console.error(`Error: ${err}`);
+        return throwError(() => `Data delete error. Please try again`);
       })
     );
   }

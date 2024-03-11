@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription, catchError, of } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+import { Subscription, catchError, finalize, of, tap, throwError } from 'rxjs';
 import { Post } from 'src/app/models/post';
 import { PostsService } from 'src/app/services/posts.service';
 
@@ -9,29 +10,61 @@ import { PostsService } from 'src/app/services/posts.service';
   styleUrls: ['./all-post.component.scss'],
 })
 export class AllPostComponent implements OnInit, OnDestroy {
-  private lSub!: Subscription;
   postsArray: Post[] = [];
+  loading: boolean = true;
 
-  constructor(private postService: PostsService) {}
+  private lSub!: Subscription;
+  private dSub!: Subscription;
+
+  constructor(
+    private postsService: PostsService,
+    private toastr: ToastrService
+  ) {}
 
   ngOnInit(): void {
-    this.lSub = this.postService
+    this.lSub = this.postsService
       .loadPosts()
       .pipe(
-        catchError((error) => {
-          console.error('Error loading data: ', error);
-          return of([]);
+        catchError((err) => {
+          return throwError(() => err);
         })
       )
-      .subscribe((data: Post[]) => {
-        data ? (this.postsArray = data) : null;
+      .subscribe({
+        next: (data: Post[]) => {
+          data ? (this.postsArray = data) : null;
+          this.loading = false;
+        },
+        error: (err) => {
+          this.toastr.error(err);
+          this.loading = false;
+        },
+      });
+  }
+
+  onDelete(id: string): void {
+    this.dSub = this.postsService
+      .deletePost(id)
+      .pipe(
+        catchError((err) => {
+          return throwError(() => err);
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.toastr.success(`Data deleted successfully`);
+        },
+        error: (err) => {
+          this.toastr.error(err);
+        },
       });
   }
 
   ngOnDestroy(): void {
     if (this.lSub) {
       this.lSub.unsubscribe();
-      console.log('AllPostComponent lSub отписался');
+    }
+    if (this.dSub) {
+      this.dSub.unsubscribe();
     }
   }
 }

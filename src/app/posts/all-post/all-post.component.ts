@@ -1,6 +1,15 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { Subscription, catchError, finalize, of, tap, throwError } from 'rxjs';
+import {
+  Subscription,
+  catchError,
+  finalize,
+  map,
+  of,
+  switchMap,
+  tap,
+  throwError,
+} from 'rxjs';
 import { Post } from 'src/app/models/post';
 import { PostsService } from 'src/app/services/posts.service';
 
@@ -15,6 +24,8 @@ export class AllPostComponent implements OnInit, OnDestroy {
 
   private lSub!: Subscription;
   private dSub!: Subscription;
+  private iSub!: Subscription;
+  private fSub!: Subscription;
 
   constructor(
     private postsService: PostsService,
@@ -59,12 +70,52 @@ export class AllPostComponent implements OnInit, OnDestroy {
       });
   }
 
+  onDeleteImage(postImgUrl: string): void {
+    this.iSub = this.postsService
+      .deleteImageFromPost(postImgUrl)
+      .pipe(
+        catchError((err) => {
+          return throwError(() => err);
+        })
+      )
+      .subscribe({
+        next: () => {},
+        error: (err) => {
+          this.toastr.error(err);
+        },
+      });
+  }
+
+  markFeatured(id: string, value: boolean) {
+    this.postsService
+      .markFeatured(id, value)
+      .pipe(
+        catchError((err) => {
+          return throwError(() => err);
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.toastr.success(`Data update successfully`);
+        },
+        error: (err) => {
+          this.toastr.error(err);
+        },
+      });
+  }
+
   ngOnDestroy(): void {
     if (this.lSub) {
       this.lSub.unsubscribe();
     }
     if (this.dSub) {
       this.dSub.unsubscribe();
+    }
+    if (this.iSub) {
+      this.iSub.unsubscribe();
+    }
+    if (this.fSub) {
+      this.fSub.unsubscribe();
     }
   }
 }

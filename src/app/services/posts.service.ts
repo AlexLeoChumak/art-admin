@@ -4,12 +4,14 @@ import {
   ref,
   uploadBytes,
   getDownloadURL,
+  deleteObject,
 } from '@angular/fire/storage';
-import { from, Observable, Subscriber, Subscription, throwError } from 'rxjs';
-import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
+import { from, Observable, Subscriber, throwError } from 'rxjs';
+import { catchError, finalize, map, switchMap } from 'rxjs/operators';
 import { Post } from '../models/post';
 import {
   DocumentData,
+  DocumentReference,
   DocumentSnapshot,
   Firestore,
   FirestoreError,
@@ -18,11 +20,9 @@ import {
   deleteDoc,
   doc,
   getDoc,
-  getDocs,
   onSnapshot,
   updateDoc,
 } from '@angular/fire/firestore';
-import { DocumentReference } from 'firebase/firestore/lite';
 
 @Injectable({
   providedIn: 'root',
@@ -135,12 +135,36 @@ export class PostsService {
     );
   }
 
+  markFeatured(id: string, featuredData: boolean) {
+    // метод обновляет значение поля isFeatured в документе в Firestore
+    return from(
+      updateDoc(doc(this.categoriesCollection, id), {
+        isFeatured: featuredData,
+      })
+    ).pipe(
+      catchError((err: FirestoreError) => {
+        console.error(`Error: ${err}`);
+        return throwError(() => `Data update error. Please try again`);
+      })
+    );
+  }
+
   deletePost(id: string) {
     // метод удаляет документ из Firestore
     return from(deleteDoc(doc(this.categoriesCollection, id))).pipe(
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
         return throwError(() => `Data delete error. Please try again`);
+      })
+    );
+  }
+
+  deleteImageFromPost(postImgPath: string) {
+    // метод удаляет изображение из Storage
+    return from(deleteObject(ref(this.storage, postImgPath))).pipe(
+      catchError((err: FirestoreError) => {
+        console.error(`Error: ${err}`);
+        return throwError(() => `Image delete error. Please try again`);
       })
     );
   }

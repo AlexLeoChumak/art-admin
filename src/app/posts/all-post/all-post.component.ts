@@ -1,15 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import {
-  Subscription,
-  catchError,
-  finalize,
-  map,
-  of,
-  switchMap,
-  tap,
-  throwError,
-} from 'rxjs';
+import { Subscription, catchError, throwError } from 'rxjs';
 import { Post } from 'src/app/models/post';
 import { PostsService } from 'src/app/services/posts.service';
 
@@ -26,6 +17,7 @@ export class AllPostComponent implements OnInit, OnDestroy {
   private dSub!: Subscription;
   private iSub!: Subscription;
   private fSub!: Subscription;
+  private mSub!: Subscription;
 
   constructor(
     private postsService: PostsService,
@@ -87,7 +79,7 @@ export class AllPostComponent implements OnInit, OnDestroy {
   }
 
   markFeatured(id: string, value: boolean) {
-    this.postsService
+    this.mSub = this.postsService
       .markFeatured(id, value)
       .pipe(
         catchError((err) => {
@@ -116,6 +108,9 @@ export class AllPostComponent implements OnInit, OnDestroy {
     }
     if (this.fSub) {
       this.fSub.unsubscribe();
+    }
+    if (this.mSub) {
+      this.mSub.unsubscribe();
     }
   }
 }

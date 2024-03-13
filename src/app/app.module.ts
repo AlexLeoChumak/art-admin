@@ -9,6 +9,7 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { provideStorage, getStorage } from '@angular/fire/storage';
+import { Auth, getAuth, provideAuth } from '@angular/fire/auth';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -20,6 +21,7 @@ import { CategoriesComponent } from './categories/categories.component';
 import { ToastrModule } from 'ngx-toastr';
 import { AllPostComponent } from './posts/all-post/all-post.component';
 import { NewPostComponent } from './posts/new-post/new-post.component';
+import { LoginComponent } from './auth/login/login.component';
 
 @NgModule({
   declarations: [
@@ -30,6 +32,7 @@ import { NewPostComponent } from './posts/new-post/new-post.component';
     CategoriesComponent,
     AllPostComponent,
     NewPostComponent,
+    LoginComponent,
   ],
   imports: [
     BrowserModule,
@@ -41,6 +44,7 @@ import { NewPostComponent } from './posts/new-post/new-post.component';
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
     provideFirestore(() => getFirestore()),
     provideStorage(() => getStorage()),
+    provideAuth(() => getAuth()),
     ToastrModule.forRoot(),
     AngularEditorModule,
   ],

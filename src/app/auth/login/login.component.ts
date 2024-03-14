@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription, catchError, throwError } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
+import { UserDataService } from 'src/app/services/user-data.service';
 
 @Component({
   selector: 'app-login',
@@ -11,39 +12,19 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  private lSub!: Subscription;
-  private uSub!: Subscription;
+  private loginSub!: Subscription;
 
   constructor(
     private authService: AuthService,
     private toastr: ToastrService,
-    private router: Router
+    private router: Router,
+    private userDataService: UserDataService
   ) {}
 
-  ngOnInit(): void {
-    this.uSub = this.authService
-      .loadUser()
-      .pipe(
-        catchError((err) => {
-          return throwError(() => err);
-        })
-      )
-      .subscribe({
-        next: (user) => {
-          if (user) {
-            localStorage.setItem('user', JSON.stringify(user));
-          } else {
-            localStorage.clear();
-          }
-        },
-        error: () => {
-          this.toastr.error(`Authorisation Error`);
-        },
-      });
-  }
+  ngOnInit(): void {}
 
   onSubmit(form: { email: string; password: string }) {
-    this.lSub = this.authService
+    this.loginSub = this.authService
       .login(form.email, form.password)
       .pipe(
         catchError((err: FirebaseError) => {
@@ -51,9 +32,16 @@ export class LoginComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe({
-        next: () => {
-          this.router.navigate(['/']);
+        next: (res) => {
+          const user = res.user;
+
+          if (user) {
+            localStorage.setItem('user', JSON.stringify(user));
+            this.userDataService.changeData(user.email);
+          }
+
           this.toastr.success(`Login successful`);
+          this.router.navigate(['/']);
         },
         error: (err) => {
           this.toastr.error(err);
@@ -62,11 +50,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.lSub) {
-      this.lSub.unsubscribe();
-    }
-    if (this.uSub) {
-      this.uSub.unsubscribe();
+    if (this.loginSub) {
+      this.loginSub.unsubscribe();
     }
   }
 }

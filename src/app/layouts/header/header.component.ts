@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription, catchError, throwError } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
-import { UserDataService } from 'src/app/services/user-data.service';
+import { StorageService } from 'src/app/services/storage.service';
 
 @Component({
   selector: 'app-header',
@@ -11,22 +11,46 @@ import { UserDataService } from 'src/app/services/user-data.service';
   styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  userEmail!: string | null;
+  userEmail!: any;
 
   private logoutSub!: Subscription;
   private userEmailSub!: Subscription;
+  private checkAuthSub!: Subscription;
 
   constructor(
     private authService: AuthService,
     private toastr: ToastrService,
     private router: Router,
-    private userDataService: UserDataService
+    private storageService: StorageService
   ) {}
 
   ngOnInit(): void {
-    this.userEmailSub = this.userDataService.userEmail.subscribe((email) => {
-      this.userEmail = email;
-    });
+    this.checkAuthSub = this.authService
+      .checkAuthStatusUser()
+      .pipe(
+        catchError((err) => {
+          return throwError(() => err);
+        })
+      )
+      .subscribe({
+        next: (value) => {
+          !value ? this.onLogout() : null;
+          this.userEmail = value.email;
+        },
+        error: (err) => {
+          this.toastr.error(err);
+        },
+      });
+
+    // this.userEmailSub = this.userDataService.userData.subscribe(
+    //   (data: User | null) => {
+    //     this.userEmail = data ? data.email : null;
+    //   }
+    // );
+
+    // this.storageService.getStorage().subscribe((res) => {
+    //   res === 'user removed' ? this.onLogout() : null;
+    // });
   }
 
   onLogout() {
@@ -40,7 +64,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.userEmail = null;
-          this.toastr.success('Logout successfully');
+          this.toastr.success('Logout successful');
           this.router.navigate(['/login']);
         },
         error: (err) => {
@@ -56,5 +80,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (this.userEmailSub) {
       this.userEmailSub.unsubscribe();
     }
+    if (this.checkAuthSub) {
+      this.checkAuthSub.unsubscribe();
+    }
   }
 }
+//8.59

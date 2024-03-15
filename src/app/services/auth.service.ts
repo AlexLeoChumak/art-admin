@@ -27,7 +27,7 @@ export class AuthService {
     return from(signInWithEmailAndPassword(this.fAuth, email, password)).pipe(
       catchError((err: FirebaseError) => {
         console.error(`Error: ${err}`);
-        return throwError(() => `Login error`);
+        return throwError(() => err);
       })
     );
   }
@@ -35,12 +35,16 @@ export class AuthService {
   checkAuthStatusUser() {
     return new Observable((observer: Subscriber<any>) => {
       return onAuthStateChanged(this.auth, (user) => {
-        if (user) {
-          localStorage.setItem('user', JSON.stringify(user));
-          observer.next(user);
-        } else {
-          localStorage.removeItem('user');
-          observer.next(null);
+        try {
+          const isAuthorized = user && !user.isAnonymous && user.uid !== null;
+
+          if (isAuthorized) {
+            observer.next(user);
+          } else {
+            observer.next(false);
+          }
+        } catch (err) {
+          observer.error(err);
         }
       });
     });
@@ -51,7 +55,7 @@ export class AuthService {
       tap(() => localStorage.removeItem('user')),
       catchError((err) => {
         console.error(`Error: ${err}`);
-        return throwError(() => `Account logout error`);
+        return throwError(() => err);
       })
     );
   }

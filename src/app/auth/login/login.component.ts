@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription, catchError, throwError } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
-import { UserDataService } from 'src/app/services/user-data.service';
 
 @Component({
   selector: 'app-login',
@@ -12,19 +11,19 @@ import { UserDataService } from 'src/app/services/user-data.service';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  private loginSub!: Subscription;
+  private loginSub$!: Subscription;
+  isLoggedInGuard: boolean = false;
 
   constructor(
     private authService: AuthService,
     private toastr: ToastrService,
-    private router: Router,
-    private userDataService: UserDataService
+    private router: Router
   ) {}
 
   ngOnInit(): void {}
 
   onSubmit(form: { email: string; password: string }) {
-    this.loginSub = this.authService
+    this.loginSub$ = this.authService
       .login(form.email, form.password)
       .pipe(
         catchError((err: FirebaseError) => {
@@ -37,9 +36,9 @@ export class LoginComponent implements OnInit, OnDestroy {
 
           if (user) {
             localStorage.setItem('user', JSON.stringify(user));
-            this.userDataService.changeData(user.email);
           }
 
+          this.isLoggedInGuard = true;
           this.toastr.success(`Login successful`);
           this.router.navigate(['/']);
         },
@@ -50,8 +49,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.loginSub) {
-      this.loginSub.unsubscribe();
+    if (this.loginSub$) {
+      this.loginSub$.unsubscribe();
     }
   }
 }

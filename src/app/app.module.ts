@@ -9,7 +9,7 @@ import { AngularEditorModule } from '@kolkov/angular-editor';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { provideStorage, getStorage } from '@angular/fire/storage';
-import { Auth, getAuth, provideAuth } from '@angular/fire/auth';
+import { getAuth, provideAuth } from '@angular/fire/auth';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -52,3 +52,5 @@ import { LoginComponent } from './auth/login/login.component';
   bootstrap: [AppComponent],
 })
 export class AppModule {}
+
+//8.59

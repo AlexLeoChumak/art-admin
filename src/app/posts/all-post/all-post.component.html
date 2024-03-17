@@ -23,7 +23,7 @@
       </div>
 
       <ng-template #content>
-        <div *ngIf="postsArray.length; else noData" class="text-center">
+        <div *ngIf="postsArray.length; else noData" class="text-center mb-5">
           <div class="card shadow-effect">
             <div class="card-body">
               <table class="table row-border hover">
@@ -71,14 +71,14 @@
 
                       <button
                         *ngIf="!post.isFeatured"
-                        class="btn btn-sm btn-info ml-2"
+                        class="btn btn-sm btn-secondary btn-fix-width ml-2"
                         (click)="markFeatured(post.id, true)"
                       >
                         Mark Featured
                       </button>
                       <button
                         *ngIf="post.isFeatured"
-                        class="btn btn-sm btn-info ml-2"
+                        class="btn btn-sm btn-success btn-fix-width ml-2"
                         (click)="markFeatured(post.id, false)"
                       >
                         Remove Featured

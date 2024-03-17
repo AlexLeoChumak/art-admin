@@ -1,12 +1,15 @@
 <div class="container">
   <div class="row">
-    <div class="col-md-12 bg-secondary-theme p-5 shadow-effect">
+    <div class="col-md-12 bg-secondary-theme p-5 shadow-effect text-center">
       <h3 class="text-center text-theme-primary">
         {{ formStatus }} Categories
       </h3>
-      <p class="text-center mb-5">
-        You can {{ formStatus | lowercase }} new categories from here...
+      <p class="mb-3">
+        You can {{ formStatus | lowercase }} categories from here...
       </p>
+      <button class="btn btn-warning mb-3" routerLink="/">
+        Back to Dashboard
+      </button>
 
       <form
         #categoryForm="ngForm"
@@ -41,7 +44,7 @@
           <button
             type="submit"
             [disabled]="categoryForm.invalid"
-            class="btn btn-block btn-info mb-2 btn-theme"
+            class="btn btn-block btn-info btn-theme"
           >
             {{ formStatus }} category
           </button>
@@ -51,15 +54,13 @@
   </div>
 
   <div class="row mt-5 mb-5">
-    <div class="col-md-3"></div>
-
     <div *ngIf="loading; else content" class="text-center w-100">
       <span>Loading...</span>
     </div>
     <ng-template #content>
       <div
         *ngIf="categoryArray.length; else noData"
-        class="text-center col-md-6"
+        class="text-center col-md-12"
       >
         <div class="card shadow-effect">
           <div class="card-body">
@@ -99,6 +100,5 @@
         <div class="text-center w-100"><span>No data</span></div>
       </ng-template>
     </ng-template>
-    <div class="col-md-3"></div>
   </div>
 </div>

@@ -2,15 +2,17 @@ import { Injectable } from '@angular/core';
 import { FirebaseError } from '@angular/fire/app';
 import {
   Auth,
-  getAuth,
-  onAuthStateChanged,
+  Unsubscribe,
   signInWithEmailAndPassword,
 } from '@angular/fire/auth';
 import {
   Observable,
   Subscriber,
+  Subscription,
   catchError,
   from,
+  of,
+  switchMap,
   tap,
   throwError,
 } from 'rxjs';
@@ -19,12 +21,15 @@ import {
   providedIn: 'root',
 })
 export class AuthService {
-  auth = getAuth();
+  refreshTokenSub$!: Subscription;
+  refreshTokenUnsubscribe!: Unsubscribe;
 
-  constructor(private fAuth: Auth) {}
+  constructor(private authFirebase: Auth) {}
 
   login(email: string, password: string): Observable<any> {
-    return from(signInWithEmailAndPassword(this.fAuth, email, password)).pipe(
+    return from(
+      signInWithEmailAndPassword(this.authFirebase, email, password)
+    ).pipe(
       catchError((err: FirebaseError) => {
         console.error(`Error: ${err}`);
         return throwError(() => err);
@@ -34,11 +39,13 @@ export class AuthService {
 
   checkAuthStatusUser() {
     return new Observable((observer: Subscriber<any>) => {
-      return onAuthStateChanged(this.auth, (user) => {
+      return this.authFirebase.onAuthStateChanged((user) => {
         try {
           const isAuthorized = user && !user.isAnonymous && user.uid !== null;
 
           if (isAuthorized) {
+            console.log(user);
+
             observer.next(user);
           } else {
             observer.next(false);
@@ -51,12 +58,54 @@ export class AuthService {
   }
 
   onLogout() {
-    return from(this.fAuth.signOut()).pipe(
-      tap(() => localStorage.removeItem('user')),
+    return from(this.authFirebase.signOut()).pipe(
+      tap(() => {
+        localStorage.removeItem('user');
+        if (this.refreshTokenUnsubscribe) {
+          this.refreshTokenUnsubscribe();
+        }
+        if (this.refreshTokenSub$) {
+          this.refreshTokenSub$.unsubscribe();
+        }
+      }),
       catchError((err) => {
         console.error(`Error: ${err}`);
         return throwError(() => err);
       })
+    );
+  }
+
+  refreshToken(): void {
+    this.refreshTokenUnsubscribe = this.authFirebase.onAuthStateChanged(
+      (user) => {
+        if (user) {
+          this.refreshTokenSub$ = from(user.getIdToken(true))
+            .pipe(
+              switchMap((token) => {
+                if (token) {
+                  const user = localStorage.getItem('user')
+                    ? localStorage.getItem('user')
+                    : null;
+
+                  if (user) {
+                    const userObject = JSON.parse(user);
+                    userObject.stsTokenManager.accessToken = token;
+                    localStorage.setItem('user', JSON.stringify(userObject));
+                  }
+                } else {
+                  this.onLogout();
+                }
+                return of(null);
+              }),
+              catchError((err) => {
+                console.error(err);
+
+                return throwError(() => err);
+              })
+            )
+            .subscribe();
+        }
+      }
     );
   }
 }

@@ -87,9 +87,7 @@ export class AllPostComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe({
-        next: () => {
-          this.toastr.success(`Data update successfully`);
-        },
+        next: () => {},
         error: (err) => {
           this.toastr.error(err);
         },

@@ -13,9 +13,9 @@ import { StorageService } from 'src/app/services/storage.service';
 export class HeaderComponent implements OnInit, OnDestroy {
   userEmail!: any;
 
-  private logoutSub!: Subscription;
-  private userEmailSub!: Subscription;
-  private checkAuthSub!: Subscription;
+  private logoutSub$!: Subscription;
+  private checkAuthSub$!: Subscription;
+  private getStorageSub$!: Subscription;
 
   constructor(
     private authService: AuthService,
@@ -25,7 +25,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.checkAuthSub = this.authService
+    this.checkAuthSub$ = this.authService
       .checkAuthStatusUser()
       .pipe(
         catchError((err) => {
@@ -34,27 +34,20 @@ export class HeaderComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (value) => {
-          !value ? this.onLogout() : null;
-          this.userEmail = value.email;
+          this.userEmail = value ? value.email : null;
         },
         error: (err) => {
           this.toastr.error(err);
         },
       });
 
-    // this.userEmailSub = this.userDataService.userData.subscribe(
-    //   (data: User | null) => {
-    //     this.userEmail = data ? data.email : null;
-    //   }
-    // );
-
-    // this.storageService.getStorage().subscribe((res) => {
-    //   res === 'user removed' ? this.onLogout() : null;
-    // });
+    this.getStorageSub$ = this.storageService.getStorage().subscribe((res) => {
+      res === 'user removed' ? this.onLogout() : null;
+    });
   }
 
   onLogout() {
-    this.logoutSub = this.authService
+    this.logoutSub$ = this.authService
       .onLogout()
       .pipe(
         catchError((err) => {
@@ -74,15 +67,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.logoutSub) {
-      this.logoutSub.unsubscribe();
+    if (this.logoutSub$) {
+      this.logoutSub$.unsubscribe();
     }
-    if (this.userEmailSub) {
-      this.userEmailSub.unsubscribe();
+    if (this.checkAuthSub$) {
+      this.checkAuthSub$.unsubscribe();
     }
-    if (this.checkAuthSub) {
-      this.checkAuthSub.unsubscribe();
+    if (this.getStorageSub$) {
+      this.getStorageSub$.unsubscribe();
     }
   }
 }
-//8.59

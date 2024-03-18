@@ -1,0 +1,12 @@
+@media (max-width: 1199px) {
+  .col-md-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 575px) {
+  input {
+    height: 50px;
+  }
+}

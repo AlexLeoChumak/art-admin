@@ -1,15 +1,18 @@
 <header class="navbar navbar-expand-lg fixed-top bg-white shadow-effect">
-  <div class="container justify-content-center">
-    <a href="#" class="site-logo">ART PROJECT</a>
-  </div>
+  <div
+    class="container justify-content-center"
+    [ngClass]="{ 'justify-content-between': userEmail }"
+  >
+    <a href="#" class="site-logo col-md-3 text-center">ART PROJECT</a>
 
-  <div *ngIf="userEmail" class="container justify-content-center">
-    <a href="#" class="mr-3">{{ userEmail }}</a>
-    <button
-      class="btn btn-sm btn-info bg-secondary-theme text-theme-primary"
-      (click)="onLogout()"
-    >
-      Logout
-    </button>
+    <div *ngIf="userEmail" class="justify-content-end">
+      <a href="#" class="mr-3">{{ userEmail }}</a>
+      <button
+        class="btn btn-sm btn-info bg-secondary-theme text-theme-primary"
+        (click)="onLogout()"
+      >
+        Logout
+      </button>
+    </div>
   </div>
 </header>

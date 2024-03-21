@@ -52,5 +52,3 @@ import { LoginComponent } from './auth/login/login.component';
   bootstrap: [AppComponent],
 })
 export class AppModule {}
-
-//8.59

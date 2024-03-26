@@ -4,10 +4,10 @@
       <h3 class="text-center text-theme-primary">
         {{ formStatus }} Categories
       </h3>
-      <p class="mb-3">
+      <p class="mb-4">
         You can {{ formStatus | lowercase }} categories from here...
       </p>
-      <button class="btn btn-warning mb-3" routerLink="/">
+      <button class="btn btn-warning mb-4" routerLink="/">
         Back to Dashboard
       </button>
 
@@ -18,36 +18,38 @@
         "
         class="form-inline text-center"
       >
-        <div class="form-group col-md-10">
-          <input
-            type="text"
-            placeholder="Add new category..."
-            class="form-control shadow-effect"
-            name="category"
-            #newCategory="ngModel"
-            [(ngModel)]="formCategory"
-            required
-            maxlength="30"
-            [ngClass]="{
-              'is-invalid': newCategory.touched && newCategory.invalid
-            }"
-          />
-          <div
-            class="alert alert-danger"
-            *ngIf="newCategory.touched && newCategory.invalid"
-          >
-            Category field must be required
+        <div class="row col-md-12">
+          <div class="form-group col-md-10">
+            <input
+              type="text"
+              placeholder="Add new category..."
+              class="form-control shadow-effect"
+              name="category"
+              #newCategory="ngModel"
+              [(ngModel)]="formCategory"
+              required
+              maxlength="30"
+              [ngClass]="{
+                'is-invalid': newCategory.touched && newCategory.invalid
+              }"
+            />
+            <div
+              class="alert alert-danger"
+              *ngIf="newCategory.touched && newCategory.invalid"
+            >
+              Category field must be required
+            </div>
           </div>
-        </div>
 
-        <div class="col-md-2">
-          <button
-            type="submit"
-            [disabled]="categoryForm.invalid"
-            class="btn btn-block btn-info btn-theme"
-          >
-            {{ formStatus }} category
-          </button>
+          <div class="col-md-2">
+            <button
+              type="submit"
+              [disabled]="categoryForm.invalid"
+              class="btn btn-block btn-info btn-theme"
+            >
+              {{ formStatus }} category
+            </button>
+          </div>
         </div>
       </form>
     </div>

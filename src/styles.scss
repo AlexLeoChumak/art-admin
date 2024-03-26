@@ -8,15 +8,19 @@
 }
 
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: 16px;
   color: var(--body-text-color);
 }
 
 a {
-  text-decoration: none;
-}
+  text-decoration: none !important;
 
+  color: var(--primary-color);
+  &:hover {
+    color: var(--primary-color);
+  }
+}
 .site-logo {
   padding: 5px 20px;
   border-radius: 2px;

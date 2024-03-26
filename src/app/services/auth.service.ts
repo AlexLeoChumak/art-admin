@@ -44,8 +44,6 @@ export class AuthService {
           const isAuthorized = user && !user.isAnonymous && user.uid !== null;
 
           if (isAuthorized) {
-            console.log(user);
-
             observer.next(user);
           } else {
             observer.next(false);

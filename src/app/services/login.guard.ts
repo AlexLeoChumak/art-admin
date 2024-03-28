@@ -17,15 +17,13 @@ export class LoginGuard implements CanActivate {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<boolean> {
-    return this.authService.checkAuthStatusUser().pipe(
-      map((authenticated: boolean) => {
-        if (authenticated) {
-          this.router.navigate(['/']);
-          return false;
-        }
-        return true;
-      })
-    );
+  ): boolean {
+    const isAuth = this.authService.isAuthenticated();
+
+    if (isAuth) {
+      this.router.navigate(['/']);
+      return false;
+    }
+    return true;
   }
 }

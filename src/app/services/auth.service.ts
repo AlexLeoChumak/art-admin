@@ -1,18 +1,11 @@
 import { Injectable } from '@angular/core';
 import { FirebaseError } from '@angular/fire/app';
-import {
-  Auth,
-  Unsubscribe,
-  signInWithEmailAndPassword,
-} from '@angular/fire/auth';
+import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 import {
   Observable,
   Subscriber,
-  Subscription,
   catchError,
   from,
-  of,
-  switchMap,
   tap,
   throwError,
 } from 'rxjs';
@@ -21,15 +14,13 @@ import {
   providedIn: 'root',
 })
 export class AuthService {
-  refreshTokenSub$!: Subscription;
-  refreshTokenUnsubscribe!: Unsubscribe;
-
   constructor(private authFirebase: Auth) {}
 
   login(email: string, password: string): Observable<any> {
     return from(
       signInWithEmailAndPassword(this.authFirebase, email, password)
     ).pipe(
+      tap((responce) => this.setToken(responce)),
       catchError((err: FirebaseError) => {
         console.error(`Error: ${err}`);
         return throwError(() => err);
@@ -37,16 +28,46 @@ export class AuthService {
     );
   }
 
-  checkAuthStatusUser() {
+  isAuthenticated() {
+    return !!this.token;
+  }
+
+  private setToken(responce: any) {
+    if (responce) {
+      console.log(responce);
+
+      const expDate = new Date(
+        new Date().getTime() + +responce._tokenResponse.expiresIn * 1000
+      );
+
+      console.log(expDate);
+
+      localStorage.setItem('fb-token', responce._tokenResponse.idToken);
+      localStorage.setItem('fb-token-exp', expDate.toString());
+    } else {
+      localStorage.clear();
+    }
+  }
+
+  get token(): any {
+    const tokenExpiration = localStorage.getItem('fb-token-exp');
+    const expDate = tokenExpiration ? new Date(tokenExpiration) : null;
+
+    if (!expDate || new Date() > expDate) {
+      this.onLogout();
+      return null;
+    }
+
+    const token = localStorage.getItem('fb-token');
+    return token ? token : null;
+  }
+
+  getUserData(): Observable<any> {
     return new Observable((observer: Subscriber<any>) => {
       return this.authFirebase.onAuthStateChanged((user) => {
         try {
-          const isAuthorized = user && !user.isAnonymous && user.uid !== null;
-
-          if (isAuthorized) {
+          if (user) {
             observer.next(user);
-          } else {
-            observer.next(false);
           }
         } catch (err) {
           observer.error(err);
@@ -58,52 +79,12 @@ export class AuthService {
   onLogout() {
     return from(this.authFirebase.signOut()).pipe(
       tap(() => {
-        localStorage.removeItem('user');
-        if (this.refreshTokenUnsubscribe) {
-          this.refreshTokenUnsubscribe();
-        }
-        if (this.refreshTokenSub$) {
-          this.refreshTokenSub$.unsubscribe();
-        }
+        this.setToken(null);
       }),
       catchError((err) => {
         console.error(`Error: ${err}`);
         return throwError(() => err);
       })
-    );
-  }
-
-  refreshToken(): void {
-    this.refreshTokenUnsubscribe = this.authFirebase.onAuthStateChanged(
-      (user) => {
-        if (user) {
-          this.refreshTokenSub$ = from(user.getIdToken(true))
-            .pipe(
-              switchMap((token) => {
-                if (token) {
-                  const user = localStorage.getItem('user')
-                    ? localStorage.getItem('user')
-                    : null;
-
-                  if (user) {
-                    const userObject = JSON.parse(user);
-                    userObject.stsTokenManager.accessToken = token;
-                    localStorage.setItem('user', JSON.stringify(userObject));
-                  }
-                } else {
-                  this.onLogout();
-                }
-                return of(null);
-              }),
-              catchError((err) => {
-                console.error(err);
-
-                return throwError(() => err);
-              })
-            )
-            .subscribe();
-        }
-      }
     );
   }
 }

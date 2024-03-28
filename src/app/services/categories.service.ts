@@ -40,9 +40,9 @@ export class CategoriesService {
           const data = snapshot.docs.map(
             (docSnapshot: DocumentSnapshot<any>) => {
               const data = docSnapshot.data();
-              const id = docSnapshot.id;
+              const categoryId = docSnapshot.id;
 
-              return data ? { id, ...data } : null;
+              return data ? { categoryId, ...data } : null;
             }
           );
           observer.next(data);

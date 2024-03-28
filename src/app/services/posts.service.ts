@@ -6,9 +6,8 @@ import {
   getDownloadURL,
   deleteObject,
 } from '@angular/fire/storage';
-import { from, Observable, Subscriber, throwError } from 'rxjs';
+import { forkJoin, from, Observable, Subscriber, throwError } from 'rxjs';
 import { catchError, finalize, map, switchMap } from 'rxjs/operators';
-import { Post } from '../models/post';
 import {
   DocumentData,
   DocumentReference,
@@ -20,16 +19,20 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
   onSnapshot,
+  query,
   updateDoc,
+  where,
 } from '@angular/fire/firestore';
+import { Post } from '../models/post';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PostsService {
   storage = getStorage();
-  categoriesCollection = collection(this.fs, 'posts');
+  postCollection = collection(this.fs, 'posts');
 
   constructor(private fs: Firestore) {}
 
@@ -39,7 +42,7 @@ export class PostsService {
 
     return new Observable((observer: Subscriber<Post[]>) => {
       unsubscribe = onSnapshot(
-        this.categoriesCollection,
+        this.postCollection,
         (snapshot) => {
           const data = snapshot.docs.map(
             (docSnapshot: DocumentSnapshot<any>) => {
@@ -98,7 +101,7 @@ export class PostsService {
 
   savePostToCollection(postData: Post): Observable<string | DocumentReference> {
     // метод сохраняет пост в коллекцию Firestore
-    return from(addDoc(this.categoriesCollection, postData)).pipe(
+    return from(addDoc(this.postCollection, postData)).pipe(
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
         return throwError(() => `Data insert error. Please try again`);
@@ -127,7 +130,7 @@ export class PostsService {
 
   updatePostToCollection(id: string, editedPost: any) {
     // метод обновляет документ в Firestore
-    return from(updateDoc(doc(this.categoriesCollection, id), editedPost)).pipe(
+    return from(updateDoc(doc(this.postCollection, id), editedPost)).pipe(
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
         return throwError(() => `Data update error. Please try again`);
@@ -138,7 +141,7 @@ export class PostsService {
   markFeatured(id: string, featuredData: boolean) {
     // метод обновляет значение поля isFeatured в документе в Firestore
     return from(
-      updateDoc(doc(this.categoriesCollection, id), {
+      updateDoc(doc(this.postCollection, id), {
         isFeatured: featuredData,
       })
     ).pipe(
@@ -149,12 +152,31 @@ export class PostsService {
     );
   }
 
-  deletePost(id: string) {
-    // метод удаляет документ из Firestore
-    return from(deleteDoc(doc(this.categoriesCollection, id))).pipe(
+  deletePost(id: string): Observable<void[]> {
+    // Удаляем документ из Firestore
+    return from(deleteDoc(doc(this.postCollection, id))).pipe(
+      switchMap(() => {
+        // Создаем запрос для комментариев с фильтром по postId
+        const commentsQuery = query(
+          collection(this.fs, 'comments'),
+          where('postId', '==', id)
+        );
+
+        // Получаем комментарии по запросу
+        return from(getDocs(commentsQuery)).pipe(
+          switchMap((querySnapshot) => {
+            // Удаляем каждый комментарий
+            const deleteObservables: Observable<void>[] = [];
+            querySnapshot.forEach((doc) => {
+              deleteObservables.push(from(deleteDoc(doc.ref)));
+            });
+            return forkJoin(deleteObservables);
+          })
+        );
+      }),
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
-        return throwError(() => `Data delete error. Please try again`);
+        throw new Error('Data delete error. Please try again');
       })
     );
   }

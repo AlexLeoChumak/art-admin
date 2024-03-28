@@ -13,9 +13,9 @@ import { StorageService } from 'src/app/services/storage.service';
 export class HeaderComponent implements OnInit, OnDestroy {
   userEmail!: any;
 
-  private logoutSub$!: Subscription;
-  private checkAuthSub$!: Subscription;
-  private getStorageSub$!: Subscription;
+  private logoutSub!: Subscription;
+  private checkAuthSub!: Subscription;
+  private getStorageSub!: Subscription;
 
   constructor(
     private authService: AuthService,
@@ -25,29 +25,27 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.checkAuthSub$ = this.authService
-      .checkAuthStatusUser()
+    this.authService
+      .getUserData()
       .pipe(
         catchError((err) => {
           return throwError(() => err);
         })
       )
       .subscribe({
-        next: (value) => {
-          this.userEmail = value ? value.email : null;
+        next: (user) => {
+          user ? (this.userEmail = user.email) : null;
         },
-        error: (err) => {
-          this.toastr.error(err);
-        },
+        error: (err) => console.error(err),
       });
 
-    this.getStorageSub$ = this.storageService.getStorage().subscribe((res) => {
-      res === 'user removed' ? this.onLogout() : null;
+    this.getStorageSub = this.storageService.getStorage().subscribe((res) => {
+      res ? this.onLogout() : null;
     });
   }
 
   onLogout() {
-    this.logoutSub$ = this.authService
+    this.logoutSub = this.authService
       .onLogout()
       .pipe(
         catchError((err) => {
@@ -67,14 +65,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.logoutSub$) {
-      this.logoutSub$.unsubscribe();
-    }
-    if (this.checkAuthSub$) {
-      this.checkAuthSub$.unsubscribe();
-    }
-    if (this.getStorageSub$) {
-      this.getStorageSub$.unsubscribe();
-    }
+    this.logoutSub ? this.logoutSub.unsubscribe() : null;
+    this.checkAuthSub ? this.checkAuthSub.unsubscribe() : null;
+    this.getStorageSub ? this.getStorageSub.unsubscribe() : null;
   }
 }

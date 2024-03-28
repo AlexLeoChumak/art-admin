@@ -73,7 +73,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   onEdit(category: Category): void {
     this.formStatus = 'Edit';
     this.formCategory = category.category;
-    this.formCategoryId = category.id;
+    this.formCategoryId = category.categoryId;
   }
 
   onUpdate(formData: NgForm): void {

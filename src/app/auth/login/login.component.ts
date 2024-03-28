@@ -11,7 +11,7 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
-  private loginSub$!: Subscription;
+  private loginSub!: Subscription;
   isLoggedInGuard: boolean = false;
 
   constructor(
@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit(): void {}
 
   onSubmit(form: { email: string; password: string }) {
-    this.loginSub$ = this.authService
+    this.loginSub = this.authService
       .login(form.email, form.password)
       .pipe(
         catchError((err: FirebaseError) => {
@@ -32,14 +32,10 @@ export class LoginComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (res) => {
-          const user = res.user;
+          console.log(res);
 
-          if (user) {
-            localStorage.setItem('user', JSON.stringify(user));
-          }
-
-          this.isLoggedInGuard = true;
           this.toastr.success(`Login successful`);
+          this.isLoggedInGuard = true;
           this.router.navigate(['/']);
         },
         error: (err) => {
@@ -49,8 +45,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.loginSub$) {
-      this.loginSub$.unsubscribe();
-    }
+    this.loginSub ? this.loginSub.unsubscribe() : null;
   }
 }

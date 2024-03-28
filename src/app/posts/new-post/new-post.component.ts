@@ -35,7 +35,9 @@ export class NewPostComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private router: Router,
     private route: ActivatedRoute
-  ) {
+  ) {}
+
+  ngOnInit(): void {
     this.postForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(5)]],
       permalink: ['', [Validators.required]],
@@ -44,9 +46,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
       postImgUrl: ['', [Validators.required]],
       content: ['', [Validators.required]],
     });
-  }
 
-  ngOnInit(): void {
     this.lSub = this.categoriesService
       .loadData()
       .pipe(

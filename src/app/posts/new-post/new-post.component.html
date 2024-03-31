@@ -18,6 +18,7 @@
                 type="text"
                 class="form-control"
                 (keyup)="updatePermalink($event)"
+                maxlength="100"
                 [ngClass]="{
                   'is-invalid': fc['title'].touched && fc['title'].invalid
                 }"

@@ -31,9 +31,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe({
-        next: (res) => {
-          console.log(res);
-
+        next: () => {
           this.toastr.success(`Login successful`);
           this.isLoggedInGuard = true;
           this.router.navigate(['/']);

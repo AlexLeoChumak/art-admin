@@ -16,8 +16,6 @@ export class StorageService {
   }
 
   private onStorageChange(event: StorageEvent) {
-    console.log('event', event);
-
     if (event.storageArea?.length === 0 || event.key === 'fb-token-exp') {
       this.ngZone.run(() => this.storageSub$.next(true));
     }

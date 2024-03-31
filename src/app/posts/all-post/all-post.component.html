@@ -29,12 +29,12 @@
               <table class="table row-border hover">
                 <thead>
                   <tr>
-                    <th>No</th>
-                    <th>Post Image</th>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Date</th>
-                    <th>Actions</th>
+                    <th [width]="10">No</th>
+                    <th [width]="200">Post Image</th>
+                    <th [width]="250">Title</th>
+                    <th [width]="250">Category</th>
+                    <th [width]="150">Date</th>
+                    <th [width]="170">Actions</th>
                   </tr>
                 </thead>
 
@@ -48,12 +48,16 @@
                         class="img img-fluid"
                       />
                     </td>
-                    <td [width]="200">{{ post.title }}</td>
-                    <td>{{ post.category.category }}</td>
-                    <td>{{ post.createdAt | date }}</td>
-                    <td>
+                    <td [width]="250" class="element-one-string-for-table">
+                      {{ post.title }}
+                    </td>
+                    <td [width]="250" class="element-one-string-for-table">
+                      {{ post.category.category }}
+                    </td>
+                    <td [width]="150">{{ post.createdAt | date }}</td>
+                    <td [width]="170" class="td-flex">
                       <button
-                        class="btn btn-sm btn-warning"
+                        class="btn btn-sm d-block btn-warning mb-2"
                         routerLink="/posts/new"
                         [queryParams]="{ id: post.id }"
                       >
@@ -61,7 +65,7 @@
                       </button>
 
                       <button
-                        class="btn btn-sm btn-danger ml-2"
+                        class="btn btn-sm btn-danger d-block mb-2"
                         (click)="
                           onDeleteImage(post.postImgUrl); onDelete(post.id)
                         "
@@ -71,14 +75,14 @@
 
                       <button
                         *ngIf="!post.isFeatured"
-                        class="btn btn-sm btn-secondary btn-fix-width ml-2"
+                        class="btn btn-sm btn-secondary d-block"
                         (click)="markFeatured(post.id, true)"
                       >
                         Mark Featured
                       </button>
                       <button
                         *ngIf="post.isFeatured"
-                        class="btn btn-sm btn-success btn-fix-width ml-2"
+                        class="btn btn-sm btn-success d-block"
                         (click)="markFeatured(post.id, false)"
                       >
                         Remove Featured

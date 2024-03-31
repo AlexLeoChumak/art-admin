@@ -62,3 +62,26 @@ input[type="password"] {
   border: none;
   background-color: var(--primary-color);
 }
+
+.element-one-string-for-table {
+  word-wrap: break-word;
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.element-one-string-without-dblock {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+}
+
+.element-three-string {
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* количество отображаемых строк */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+}

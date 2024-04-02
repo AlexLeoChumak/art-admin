@@ -8,6 +8,8 @@ import { LoginComponent } from './auth/login/login.component';
 import { AuthGuard } from './services/auth.guard';
 import { LoginGuard } from './services/login.guard';
 import { SubscribersComponent } from './subscribers/subscribers.component';
+import { UsersComponent } from './users/users.component';
+import { CommentsComponent } from './comments/comments.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent, canActivate: [AuthGuard] },
@@ -21,6 +23,16 @@ const routes: Routes = [
   {
     path: 'subscribers',
     component: SubscribersComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'comments',
+    component: CommentsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'users',
+    component: UsersComponent,
     canActivate: [AuthGuard],
   },
   { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },

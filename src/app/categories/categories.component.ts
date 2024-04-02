@@ -16,7 +16,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   formStatus: string = 'Add';
   formCategory!: string;
   formCategoryId!: string;
-  loading: boolean = true;
+  isLoading: boolean = true;
 
   public sSub!: Subscription;
   public lSub!: Subscription;
@@ -30,7 +30,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.lSub = this.categoriesService
-      .loadData()
+      .loadCategories()
       .pipe(
         catchError((err) => {
           return throwError(() => err);
@@ -39,18 +39,24 @@ export class CategoriesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (arr: Category[]) => {
           arr ? (this.categoryArray = arr) : null;
-          this.loading = false;
+          this.isLoading = false;
         },
         error: (err) => {
           this.toastr.error(err);
-          this.loading = false;
+          this.isLoading = false;
         },
       });
   }
 
   onSubmit(formData: NgForm) {
+    if (formData.invalid) {
+      return;
+    }
+
+    this.isLoading = true;
+
     this.sSub = this.categoriesService
-      .saveData({ ...formData.value })
+      .saveCategory({ ...formData.value })
       .pipe(
         catchError((err) => {
           return throwError(() => err);
@@ -59,6 +65,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res: any) => {
           formData.reset();
+          this.isLoading = false;
 
           if (res) {
             this.toastr.success('Data insert successfully');
@@ -66,6 +73,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.toastr.error(err);
+          this.isLoading = false;
         },
       });
   }
@@ -77,6 +85,11 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   }
 
   onUpdate(formData: NgForm): void {
+    if (formData.invalid) {
+      return;
+    }
+
+    this.isLoading = true;
     const { category } = formData.value;
     const editedData: string = category;
 
@@ -87,16 +100,18 @@ export class CategoriesComponent implements OnInit, OnDestroy {
           this.toastr.success('Data update successfully');
           this.formStatus = 'Add';
           formData.resetForm();
+          this.isLoading = false;
         },
         error: (err) => {
           this.toastr.error(err);
+          this.isLoading = false;
         },
       });
   }
 
   onDelete(id: string): void {
     this.dSub = this.categoriesService
-      .deleteData(id)
+      .deleteCategory(id)
       .pipe(
         catchError((err) => {
           return throwError(() => err);

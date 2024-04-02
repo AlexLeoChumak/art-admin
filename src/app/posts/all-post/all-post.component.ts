@@ -11,7 +11,7 @@ import { PostsService } from 'src/app/services/posts.service';
 })
 export class AllPostComponent implements OnInit, OnDestroy {
   postsArray: Post[] = [];
-  loading: boolean = true;
+  isLoading: boolean = true;
 
   private lSub!: Subscription;
   private dSub!: Subscription;
@@ -35,11 +35,11 @@ export class AllPostComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (data: Post[]) => {
           data ? (this.postsArray = data) : null;
-          this.loading = false;
+          this.isLoading = false;
         },
         error: (err) => {
           this.toastr.error(err);
-          this.loading = false;
+          this.isLoading = false;
         },
       });
   }

@@ -13,7 +13,7 @@ export class SubscribersComponent implements OnInit, OnDestroy {
   private loadDataSub!: Subscription;
   private deleteDataSub!: Subscription;
   subscribers!: SubscriberUser[];
-  loading: boolean = true;
+  isLoading: boolean = true;
 
   constructor(
     private subscribersService: SubscribersService,
@@ -22,22 +22,22 @@ export class SubscribersComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadDataSub = this.subscribersService
-      .loadData()
+      .loadSubscribers()
       .pipe(catchError((err) => throwError(() => err)))
       .subscribe({
         next: (data) => {
           this.subscribers = data;
-          this.loading = false;
+          this.isLoading = false;
         },
         error: (err) => {
-          this.toastr.error(err), (this.loading = false);
+          this.toastr.error(err), (this.isLoading = false);
         },
       });
   }
 
-  deleteData(id: string) {
+  deleteSubscribers(id: string) {
     this.deleteDataSub = this.subscribersService
-      .deleteData(id)
+      .deleteSubscriber(id)
       .pipe(catchError((err) => throwError(() => err)))
       .subscribe({
         next: () => this.toastr.success('Subscriber is deleted successfully'),

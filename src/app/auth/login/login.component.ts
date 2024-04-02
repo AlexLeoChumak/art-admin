@@ -13,6 +13,7 @@ import { AuthService } from 'src/app/services/auth.service';
 export class LoginComponent implements OnInit, OnDestroy {
   private loginSub!: Subscription;
   isLoggedInGuard: boolean = false;
+  isLoading!: boolean;
 
   constructor(
     private authService: AuthService,
@@ -23,6 +24,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit(): void {}
 
   onSubmit(form: { email: string; password: string }) {
+    this.isLoading = true;
+
     this.loginSub = this.authService
       .login(form.email, form.password)
       .pipe(
@@ -35,9 +38,11 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.toastr.success(`Login successful`);
           this.isLoggedInGuard = true;
           this.router.navigate(['/']);
+          this.isLoading = false;
         },
         error: (err) => {
           this.toastr.error(err);
+          this.isLoading = false;
         },
       });
   }

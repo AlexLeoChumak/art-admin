@@ -22,6 +22,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
   post!: any;
   formStatus: string = 'Add New';
   postId!: string;
+  isLoading!: boolean;
 
   private lSub!: Subscription;
   private uSub!: Subscription;
@@ -48,7 +49,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
     });
 
     this.lSub = this.categoriesService
-      .loadData()
+      .loadCategories()
       .pipe(
         catchError((error) => {
           console.error('Error loading data: ', error);
@@ -132,6 +133,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.isLoading = true;
     const splitted = this.postForm.value.category.split('-');
 
     const postData: Post = {
@@ -163,6 +165,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.toastr.success('Data insert successfully'),
           this.router.navigate(['/posts']);
+        this.isLoading = false;
       });
   }
 

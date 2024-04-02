@@ -85,3 +85,44 @@ input[type="password"] {
   text-overflow: ellipsis;
   word-wrap: break-word;
 }
+
+.alert-danger {
+  width: 100%;
+  text-align: left;
+}
+
+@media (max-width: 992px) {
+  table thead {
+    display: none;
+  }
+
+  table tbody {
+    width: 100%;
+  }
+
+  table tr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+  }
+
+  table td {
+    font-weight: bold;
+  }
+
+  table td:first-of-type {
+    background: rgb(201, 201, 201);
+    width: 30px;
+  }
+}
+
+@media (max-width: 500px) {
+  .card-body {
+    padding: 10px;
+  }
+  table td {
+    padding: 20px 0 !important;
+    width: 100%;
+  }
+}

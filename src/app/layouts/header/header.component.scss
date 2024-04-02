@@ -4,3 +4,36 @@ header {
     font-size: 1.5em;
   }
 }
+
+@media (max-width: 768px) {
+  .navbar .container {
+    flex-direction: column;
+  }
+  header {
+    height: 140px;
+
+    .site-logo {
+      margin-bottom: 10px;
+    }
+  }
+  .justify-content-end {
+    display: flex;
+    flex-direction: column;
+  }
+  .mr-3 {
+    margin-right: 0 !important;
+    margin-bottom: 10px;
+  }
+}
+
+@media screen and (max-width: 600px) and (orientation: portrait) {
+  .navbar {
+    position: static !important;
+  }
+}
+
+@media screen and (max-height: 440px) and (orientation: landscape) {
+  .navbar {
+    position: static !important;
+  }
+}

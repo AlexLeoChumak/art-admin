@@ -7,7 +7,7 @@ import {
   deleteObject,
 } from '@angular/fire/storage';
 import { forkJoin, from, Observable, Subscriber, throwError } from 'rxjs';
-import { catchError, finalize, map, switchMap } from 'rxjs/operators';
+import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
 import {
   DocumentData,
   DocumentReference,
@@ -26,6 +26,7 @@ import {
   where,
 } from '@angular/fire/firestore';
 import { Post } from '../models/post';
+import { HandlerDataService } from './handler-data.service';
 
 @Injectable({
   providedIn: 'root',
@@ -34,40 +35,13 @@ export class PostsService {
   storage = getStorage();
   postCollection = collection(this.fs, 'posts');
 
-  constructor(private fs: Firestore) {}
+  constructor(
+    private fs: Firestore,
+    private handlerDataService: HandlerDataService
+  ) {}
 
   loadPosts(): Observable<Post[]> {
-    // метод загружает все посты из коллекции Firestore
-    let unsubscribe: () => void;
-
-    return new Observable((observer: Subscriber<Post[]>) => {
-      unsubscribe = onSnapshot(
-        this.postCollection,
-        (snapshot) => {
-          const data = snapshot.docs.map(
-            (docSnapshot: DocumentSnapshot<any>) => {
-              const docData = docSnapshot.data();
-              const id = docSnapshot.id;
-
-              return docData ? { id, ...docData } : null;
-            }
-          );
-          observer.next(data);
-        },
-        (err: FirestoreError) => {
-          console.error(`Error: ${err}`);
-          observer.error(
-            `An error occurred while loading data. Please try again`
-          );
-        }
-      );
-    }).pipe(
-      finalize(() => {
-        if (unsubscribe) {
-          unsubscribe();
-        }
-      })
-    );
+    return this.handlerDataService.loadData(this.postCollection);
   }
 
   uploadImageAndUpdatePost(
@@ -100,13 +74,7 @@ export class PostsService {
   }
 
   savePostToCollection(postData: Post): Observable<string | DocumentReference> {
-    // метод сохраняет пост в коллекцию Firestore
-    return from(addDoc(this.postCollection, postData)).pipe(
-      catchError((err: FirestoreError) => {
-        console.error(`Error: ${err}`);
-        return throwError(() => `Data insert error. Please try again`);
-      })
-    );
+    return this.handlerDataService.saveData(this.postCollection, postData);
   }
 
   loadOnePost(id: string): Observable<DocumentData> {

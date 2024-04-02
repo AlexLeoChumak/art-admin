@@ -1,3 +1,4 @@
+<app-preloader [isLoading]="isLoading"></app-preloader>
 <div class="container">
   <div class="row">
     <div class="col-md-12">
@@ -18,87 +19,81 @@
 
   <div class="row mt-5">
     <div class="col-md-12">
-      <div *ngIf="loading; else content" class="text-center">
-        <span>Loading...</span>
-      </div>
+      <div *ngIf="postsArray.length; else noData" class="text-center mb-5">
+        <div class="card shadow-effect">
+          <div class="card-body">
+            <table class="table row-border hover">
+              <thead>
+                <tr>
+                  <th [width]="10">No</th>
+                  <th [width]="200">Post Image</th>
+                  <th [width]="250">Title</th>
+                  <th [width]="250">Category</th>
+                  <th [width]="150">Date</th>
+                  <th [width]="170">Actions</th>
+                </tr>
+              </thead>
 
-      <ng-template #content>
-        <div *ngIf="postsArray.length; else noData" class="text-center mb-5">
-          <div class="card shadow-effect">
-            <div class="card-body">
-              <table class="table row-border hover">
-                <thead>
-                  <tr>
-                    <th [width]="10">No</th>
-                    <th [width]="200">Post Image</th>
-                    <th [width]="250">Title</th>
-                    <th [width]="250">Category</th>
-                    <th [width]="150">Date</th>
-                    <th [width]="170">Actions</th>
-                  </tr>
-                </thead>
+              <tbody>
+                <tr *ngFor="let post of postsArray; let i = index">
+                  <td [width]="10">{{ i + 1 }}</td>
+                  <td [width]="200">
+                    <img
+                      [src]="post.postImgUrl"
+                      [alt]="post.title"
+                      class="img img-fluid"
+                    />
+                  </td>
+                  <td [width]="250" class="element-one-string-for-table">
+                    {{ post.title }}
+                  </td>
+                  <td [width]="250" class="element-one-string-for-table">
+                    {{ post.category.category }}
+                  </td>
+                  <td [width]="150">{{ post.createdAt | date }}</td>
+                  <td [width]="170" class="td-flex">
+                    <button
+                      class="btn btn-sm d-block btn-warning mb-2"
+                      routerLink="/posts/new"
+                      [queryParams]="{ id: post.id }"
+                    >
+                      Edit
+                    </button>
 
-                <tbody>
-                  <tr *ngFor="let post of postsArray; let i = index">
-                    <td [width]="10">{{ i + 1 }}</td>
-                    <td [width]="200">
-                      <img
-                        [src]="post.postImgUrl"
-                        [alt]="post.title"
-                        class="img img-fluid"
-                      />
-                    </td>
-                    <td [width]="250" class="element-one-string-for-table">
-                      {{ post.title }}
-                    </td>
-                    <td [width]="250" class="element-one-string-for-table">
-                      {{ post.category.category }}
-                    </td>
-                    <td [width]="150">{{ post.createdAt | date }}</td>
-                    <td [width]="170" class="td-flex">
-                      <button
-                        class="btn btn-sm d-block btn-warning mb-2"
-                        routerLink="/posts/new"
-                        [queryParams]="{ id: post.id }"
-                      >
-                        Edit
-                      </button>
+                    <button
+                      class="btn btn-sm btn-danger d-block mb-2"
+                      (click)="
+                        onDeleteImage(post.postImgUrl); onDelete(post.id)
+                      "
+                    >
+                      Delete
+                    </button>
 
-                      <button
-                        class="btn btn-sm btn-danger d-block mb-2"
-                        (click)="
-                          onDeleteImage(post.postImgUrl); onDelete(post.id)
-                        "
-                      >
-                        Delete
-                      </button>
-
-                      <button
-                        *ngIf="!post.isFeatured"
-                        class="btn btn-sm btn-secondary d-block"
-                        (click)="markFeatured(post.id, true)"
-                      >
-                        Mark Featured
-                      </button>
-                      <button
-                        *ngIf="post.isFeatured"
-                        class="btn btn-sm btn-success d-block"
-                        (click)="markFeatured(post.id, false)"
-                      >
-                        Remove Featured
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                    <button
+                      *ngIf="!post.isFeatured"
+                      class="btn btn-sm btn-secondary d-block"
+                      (click)="markFeatured(post.id, true)"
+                    >
+                      Mark Featured
+                    </button>
+                    <button
+                      *ngIf="post.isFeatured"
+                      class="btn btn-sm btn-success d-block"
+                      (click)="markFeatured(post.id, false)"
+                    >
+                      Remove Featured
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
+      </div>
 
-        <ng-template #noData>
-          <div class="text-center"><span>No Data</span></div></ng-template
-        >
-      </ng-template>
+      <ng-template #noData>
+        <div class="text-center"><span>No Data</span></div></ng-template
+      >
     </div>
   </div>
 </div>

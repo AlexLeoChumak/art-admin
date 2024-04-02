@@ -1,3 +1,4 @@
+<app-preloader [isLoading]="isLoading"></app-preloader>
 <div class="container">
   <div class="row">
     <div class="col-md-12 bg-secondary-theme p-5 shadow-effect text-center">
@@ -56,51 +57,46 @@
   </div>
 
   <div class="row mt-5 mb-5">
-    <div *ngIf="loading; else content" class="text-center w-100">
-      <span>Loading...</span>
-    </div>
-    <ng-template #content>
-      <div
-        *ngIf="categoryArray.length; else noData"
-        class="text-center col-md-12"
-      >
-        <div class="card shadow-effect">
-          <div class="card-body">
-            <table class="table row-border hover">
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th>Category</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let category of categoryArray; let i = index">
-                  <td>{{ i + 1 }}</td>
-                  <td>{{ category.category }}</td>
-                  <td class="td-buttons">
-                    <button
-                      class="btn btn-sm btn-warning w-100"
-                      (click)="onEdit(category)"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      class="btn btn-sm btn-danger mt-2 w-100"
-                      (click)="onDelete(category.categoryId)"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+    <div
+      *ngIf="categoryArray.length; else noData"
+      class="text-center col-md-12"
+    >
+      <div class="card shadow-effect">
+        <div class="card-body">
+          <table class="table row-border hover">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Category</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let category of categoryArray; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ category.category }}</td>
+                <td class="td-buttons">
+                  <button
+                    class="btn btn-sm btn-warning w-100"
+                    (click)="onEdit(category)"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    class="btn btn-sm btn-danger mt-2 w-100"
+                    (click)="onDelete(category.categoryId)"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-      <ng-template #noData>
-        <div class="text-center w-100"><span>No data</span></div>
-      </ng-template>
+    </div>
+    <ng-template #noData>
+      <div class="text-center w-100"><span>No data</span></div>
     </ng-template>
   </div>
 </div>

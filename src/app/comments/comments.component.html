@@ -1,0 +1,72 @@
+<app-preloader [isLoading]="isLoading"></app-preloader>
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card shadow-effect bg-secondary-theme">
+        <div class="card-body text-center">
+          <h3 class="text-theme-center">All Comments</h3>
+          <p>From here you can manage comments</p>
+          <button class="btn btn-warning ml-2" routerLink="/">
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-5">
+    <div class="col-md-12">
+      <div *ngIf="comments?.length; else noData" class="text-center mb-5">
+        <div class="card shadow-effect">
+          <div class="card-body">
+            <table class="table row-border hover">
+              <thead>
+                <tr>
+                  <th [width]="10">No</th>
+                  <th>Author</th>
+                  <th>Comment</th>
+                  <th>Reply Comments</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr *ngFor="let comment of comments; let i = index">
+                  <td>{{ i + 1 }}</td>
+                  <td class="element-one-string-for-table">
+                    {{ comment.author }}
+                  </td>
+                  <td class="element-one-string-for-table">
+                    {{ comment.comment }}
+                  </td>
+                  <td *ngIf="!comment.replyComments.length">No replies</td>
+                  <td
+                    class="element-one-string-for-table"
+                    *ngFor="let reply of comment.replyComments; let i = index"
+                  >
+                    <p>{{ i + 1 }}. {{ reply.author }}:</p>
+                    <p>
+                      {{ reply.comment }}
+                    </p>
+                  </td>
+                  <td>
+                    <button
+                      class="btn btn-sm btn-danger"
+                      (click)="deleteComment(comment.id)"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noData>
+        <div class="text-center"><span>No Data</span></div></ng-template
+      >
+    </div>
+  </div>
+</div>

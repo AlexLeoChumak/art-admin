@@ -23,6 +23,9 @@ import { AllPostComponent } from './posts/all-post/all-post.component';
 import { NewPostComponent } from './posts/new-post/new-post.component';
 import { LoginComponent } from './auth/login/login.component';
 import { SubscribersComponent } from './subscribers/subscribers.component';
+import { UsersComponent } from './users/users.component';
+import { PreloaderComponent } from './preloader/preloader.component';
+import { CommentsComponent } from './comments/comments.component';
 
 @NgModule({
   declarations: [
@@ -35,6 +38,9 @@ import { SubscribersComponent } from './subscribers/subscribers.component';
     NewPostComponent,
     LoginComponent,
     SubscribersComponent,
+    UsersComponent,
+    PreloaderComponent,
+    CommentsComponent,
   ],
   imports: [
     BrowserModule,

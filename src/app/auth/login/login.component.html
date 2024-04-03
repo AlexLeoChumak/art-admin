@@ -22,7 +22,7 @@
                 ngModel
                 required
                 email
-                [ngClass]="{ 'is-nvalid': Email.touched && Email.invalid }"
+                [ngClass]="{ 'is-invalid': Email.touched && Email.invalid }"
               />
 
               <div
@@ -40,7 +40,7 @@
 
             <div class="form-group">
               <input
-                type="password"
+                [type]="isVisibilityPassword ? 'text' : 'password'"
                 class="form-control"
                 placeholder="Password"
                 name="password"
@@ -49,9 +49,19 @@
                 required
                 minlength="6"
                 [ngClass]="{
-                  'is-nvalid': Password.touched && Password.invalid
+                  'is-invalid': Password.touched && Password.invalid
                 }"
               />
+              <i
+                class="fa fa-eye"
+                *ngIf="!isVisibilityPassword"
+                (click)="isVisibilityPassword = !isVisibilityPassword"
+              ></i>
+              <i
+                class="fa fa-eye-slash"
+                *ngIf="isVisibilityPassword"
+                (click)="isVisibilityPassword = !isVisibilityPassword"
+              ></i>
 
               <div
                 class="alert alert-danger"

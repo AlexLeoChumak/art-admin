@@ -1,12 +1,23 @@
+.form-group:nth-of-type(2) {
+  position: relative;
+}
+
+i.fa.fa-eye,
+i.fa.fa-eye-slash {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+i.fa.fa-eye-slash {
+  right: 29px;
+}
+
 @media (max-width: 1199px) {
   .col-md-6 {
     flex: 0 0 100%;
     max-width: 100%;
-  }
-}
-
-@media (max-width: 575px) {
-  input {
-    height: 50px;
   }
 }

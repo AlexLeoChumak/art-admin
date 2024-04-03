@@ -14,6 +14,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   private loginSub!: Subscription;
   isLoggedInGuard: boolean = false;
   isLoading!: boolean;
+  isVisibilityPassword: boolean = false;
 
   constructor(
     private authService: AuthService,

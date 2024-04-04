@@ -38,8 +38,8 @@ export class AuthService {
         new Date().getTime() + +responce._tokenResponse.expiresIn * 1000
       );
 
-      localStorage.setItem('fb-token', btoa(responce._tokenResponse.idToken));
-      localStorage.setItem('fb-token-exp', btoa(expDate.toString()));
+      localStorage.setItem('fb-token', responce._tokenResponse.idToken);
+      localStorage.setItem('fb-token-exp', expDate.toString());
     } else {
       localStorage.clear();
     }
@@ -47,7 +47,7 @@ export class AuthService {
 
   get token(): any {
     const tokenExpiration = localStorage.getItem('fb-token-exp');
-    const expDate = tokenExpiration ? new Date(atob(tokenExpiration)) : null;
+    const expDate = tokenExpiration ? new Date(tokenExpiration) : null;
 
     if (!expDate || new Date() > expDate) {
       this.onLogout();
@@ -55,7 +55,7 @@ export class AuthService {
     }
 
     const token = localStorage.getItem('fb-token');
-    return token ? atob(token) : null;
+    return token ? token : null;
   }
 
   getUserData(): Observable<any> {

@@ -6,25 +6,23 @@ import {
   getDownloadURL,
   deleteObject,
 } from '@angular/fire/storage';
-import { forkJoin, from, Observable, Subscriber, throwError } from 'rxjs';
-import { catchError, finalize, map, switchMap, tap } from 'rxjs/operators';
+import { forkJoin, from, Observable, throwError } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import {
   DocumentData,
   DocumentReference,
-  DocumentSnapshot,
   Firestore,
   FirestoreError,
-  addDoc,
   collection,
   deleteDoc,
   doc,
   getDoc,
   getDocs,
-  onSnapshot,
   query,
   updateDoc,
   where,
 } from '@angular/fire/firestore';
+
 import { Post } from '../models/post';
 import { HandlerDataService } from './handler-data.service';
 

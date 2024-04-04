@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription, catchError, throwError } from 'rxjs';
+
 import { UsersService } from '../services/users.service';
 import { UserReg } from '../models/user-reg';
 

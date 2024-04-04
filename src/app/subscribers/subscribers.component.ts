@@ -1,8 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { SubscribersService } from '../services/subscribers.service';
 import { Subscription, catchError, throwError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
-import { SubscriberUser } from '../models/subscriberUser';
+
+import { SubscribersService } from '../services/subscribers.service';
+import { SubscriberUser } from '../models/subscriber-user';
 
 @Component({
   selector: 'app-subscribers',

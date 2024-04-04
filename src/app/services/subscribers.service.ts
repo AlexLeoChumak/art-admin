@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Firestore, collection } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { SubscriberUser } from '../models/subscriberUser';
+
+import { SubscriberUser } from '../models/subscriber-user';
 import { HandlerDataService } from './handler-data.service';
 
 @Injectable({

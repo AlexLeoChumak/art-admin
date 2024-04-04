@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CategoriesComponent } from './categories/categories.component';
 import { NewPostComponent } from './posts/new-post/new-post.component';
@@ -10,6 +11,7 @@ import { LoginGuard } from './services/login.guard';
 import { SubscribersComponent } from './subscribers/subscribers.component';
 import { UsersComponent } from './users/users.component';
 import { CommentsComponent } from './comments/comments.component';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
 const routes: Routes = [
   { path: '', component: DashboardComponent, canActivate: [AuthGuard] },
@@ -36,7 +38,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   { path: 'login', component: LoginComponent, canActivate: [LoginGuard] },
-  { path: '**', redirectTo: '', pathMatch: 'full' },
+  { path: '**', component: PageNotFoundComponent, pathMatch: 'full' },
 ];
 
 @NgModule({

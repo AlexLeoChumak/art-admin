@@ -39,16 +39,24 @@
                   <td class="element-one-string-for-table">
                     {{ comment.comment }}
                   </td>
-                  <td *ngIf="!comment.replyComments.length">No replies</td>
-                  <td
-                    class="element-one-string-for-table"
-                    *ngFor="let reply of comment.replyComments; let i = index"
-                  >
-                    <p>{{ i + 1 }}. {{ reply.author }}:</p>
-                    <p>
-                      {{ reply.comment }}
-                    </p>
+                  <td *ngIf="!comment.replyComments.length; else replies">
+                    No replies
                   </td>
+                  <ng-template #replies>
+                    <td class="element-one-string-for-table">
+                      <div
+                        *ngFor="
+                          let reply of comment.replyComments;
+                          let i = index
+                        "
+                      >
+                        <p>{{ i + 1 }}. {{ reply.author }}:</p>
+                        <p>
+                          {{ reply.comment }}
+                        </p>
+                      </div>
+                    </td>
+                  </ng-template>
                   <td>
                     <button
                       class="btn btn-sm btn-danger"

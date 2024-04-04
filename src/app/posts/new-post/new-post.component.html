@@ -8,9 +8,9 @@
   </div>
 
   <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
-    <div class="row">
+    <div class="row justify-content-center">
       <div class="col-md-7">
-        <div class="card shadow-effect">
+        <div class="card">
           <div class="card-body">
             <div class="form-group">
               <label>Title</label>
@@ -100,58 +100,61 @@
       </div>
 
       <div class="col-md-5">
-        <div class="form-group">
-          <label> Please select a post category</label>
-          <select
-            formControlName="category"
-            class="form-control"
-            [ngClass]="{
-              'is-invalid': fc['category'].touched && fc['category'].invalid
-            }"
-          >
-            <option disabled>Please select a category</option>
-            <option
-              *ngFor="let category of categoryArray"
-              value="{{ category.categoryId }}-{{ category.category }}"
+        <div class="card p-4">
+          <div class="form-group">
+            <label> Please select a post category</label>
+            <select
+              formControlName="category"
+              class="form-control"
+              [ngClass]="{
+                'is-invalid': fc['category'].touched && fc['category'].invalid
+              }"
             >
-              {{ category.category }}
-            </option>
-          </select>
+              <option disabled>Please select a category</option>
+              <option
+                *ngFor="let category of categoryArray"
+                value="{{ category.categoryId }}-{{ category.category }}"
+              >
+                {{ category.category }}
+              </option>
+            </select>
 
-          <div *ngIf="fc['category'].errors?.['required']">
-            <div
-              *ngIf="fc['category'].touched && fc['category'].invalid"
-              class="alert alert-danger"
-            >
-              Please select a category
+            <div *ngIf="fc['category'].errors?.['required']">
+              <div
+                *ngIf="fc['category'].touched && fc['category'].invalid"
+                class="alert alert-danger"
+              >
+                Please select a category
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label>Post image</label>
-          <img
-            [src]="imgSrc"
-            [alt]="postForm.value.title"
-            class="form-control img-fluid img-preview"
-          />
-          <input
-            formControlName="postImgUrl"
-            type="file"
-            class="form-control"
-            accept="image/*"
-            (change)="showPreview($event)"
-            [ngClass]="{
-              'is-invalid': fc['postImgUrl'].touched && fc['postImgUrl'].invalid
-            }"
-          />
+          <div class="form-group">
+            <label>Post image</label>
+            <img
+              [src]="imgSrc"
+              [alt]="postForm.value.title"
+              class="form-control img-fluid img-preview"
+            />
+            <input
+              formControlName="postImgUrl"
+              type="file"
+              class="form-control"
+              accept="image/*"
+              (change)="showPreview($event)"
+              [ngClass]="{
+                'is-invalid':
+                  fc['postImgUrl'].touched && fc['postImgUrl'].invalid
+              }"
+            />
 
-          <div *ngIf="fc['postImgUrl'].errors?.['required']">
-            <div
-              *ngIf="fc['postImgUrl'].touched && fc['postImgUrl'].invalid"
-              class="alert alert-danger"
-            >
-              Please select a image
+            <div *ngIf="fc['postImgUrl'].errors?.['required']">
+              <div
+                *ngIf="fc['postImgUrl'].touched && fc['postImgUrl'].invalid"
+                class="alert alert-danger"
+              >
+                Please select an image
+              </div>
             </div>
           </div>
         </div>
@@ -160,7 +163,7 @@
 
     <div class="row mt-3 mb-5">
       <div class="col-md-12">
-        <div class="card shadow-effect">
+        <div class="card">
           <div class="card-body">
             <div class="form-group">
               <label>Content</label>
@@ -183,7 +186,7 @@
 
       <div class="col-md-12 text-center mt-5 mb-1">
         <button
-          [disabled]="postForm.invalid"
+          [disabled]="postForm.invalid || submitted"
           type="submit"
           class="btn btn-info"
         >

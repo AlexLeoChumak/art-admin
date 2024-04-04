@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription, catchError, throwError } from 'rxjs';
 import { CommentsService } from '../services/comments.service';
-import { Comment } from '../models/comment';
 
 @Component({
   selector: 'app-comments',

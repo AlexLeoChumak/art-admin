@@ -3,7 +3,7 @@
     class="container justify-content-center"
     [ngClass]="{ 'justify-content-between': userEmail }"
   >
-    <a class="site-logo col-md-4 text-center">ART PROJECT</a>
+    <a class="site-logo col-md-4 text-center" routerLink="/">ART PROJECT</a>
 
     <div *ngIf="userEmail" class="justify-content-end">
       <a class="mr-3">{{ userEmail }}</a>

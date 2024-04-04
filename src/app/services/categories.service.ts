@@ -8,6 +8,7 @@ import {
   updateDoc,
   FirestoreError,
 } from '@angular/fire/firestore';
+
 import { Category } from '../models/category';
 import { HandlerDataService } from './handler-data.service';
 

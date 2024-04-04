@@ -17,6 +17,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   formCategory!: string;
   formCategoryId!: string;
   isLoading: boolean = true;
+  submitted: boolean = false;
 
   public sSub!: Subscription;
   public lSub!: Subscription;
@@ -53,6 +54,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.submitted = true;
     this.isLoading = true;
 
     this.sSub = this.categoriesService
@@ -66,6 +68,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
         next: (res: any) => {
           formData.reset();
           this.isLoading = false;
+          this.submitted = false;
 
           if (res) {
             this.toastr.success('Data insert successfully');
@@ -74,6 +77,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
         error: (err) => {
           this.toastr.error(err);
           this.isLoading = false;
+          this.submitted = false;
         },
       });
   }
@@ -88,7 +92,7 @@ export class CategoriesComponent implements OnInit, OnDestroy {
     if (formData.invalid) {
       return;
     }
-
+    this.submitted = true;
     this.isLoading = true;
     const { category } = formData.value;
     const editedData: string = category;
@@ -101,10 +105,12 @@ export class CategoriesComponent implements OnInit, OnDestroy {
           this.formStatus = 'Add';
           formData.resetForm();
           this.isLoading = false;
+          this.submitted = false;
         },
         error: (err) => {
           this.toastr.error(err);
           this.isLoading = false;
+          this.submitted = false;
         },
       });
   }
@@ -128,17 +134,9 @@ export class CategoriesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.sSub) {
-      this.sSub.unsubscribe();
-    }
-    if (this.lSub) {
-      this.lSub.unsubscribe();
-    }
-    if (this.uSub) {
-      this.uSub.unsubscribe();
-    }
-    if (this.dSub) {
-      this.dSub.unsubscribe();
-    }
+    this.sSub ? this.sSub.unsubscribe() : null;
+    this.lSub ? this.lSub.unsubscribe() : null;
+    this.uSub ? this.uSub.unsubscribe() : null;
+    this.dSub ? this.dSub.unsubscribe() : null;
   }
 }

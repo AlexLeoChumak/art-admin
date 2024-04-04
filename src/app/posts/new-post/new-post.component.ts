@@ -1,13 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { EMPTY, Subscription, catchError, of } from 'rxjs';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { Subscription, catchError, map, of, switchMap } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 
 import { CategoriesService } from 'src/app/services/categories.service';
 import { Category } from 'src/app/models/category';
 import { Post } from 'src/app/models/post';
 import { PostsService } from 'src/app/services/posts.service';
-import { ToastrService } from 'ngx-toastr';
-import { ActivatedRoute, Params, Router } from '@angular/router';
 
 @Component({
   selector: 'app-new-post',
@@ -15,7 +15,8 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
   styleUrls: ['./new-post.component.scss'],
 })
 export class NewPostComponent implements OnInit, OnDestroy {
-  imgSrc: any = './assets/placeholder-image.webp';
+  imgSrc: string | ArrayBuffer | null | undefined =
+    './assets/placeholder-image.webp';
   selectedImg: any;
   categoryArray: Category[] = [];
   postForm!: FormGroup;
@@ -23,6 +24,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
   formStatus: string = 'Add New';
   postId!: string;
   isLoading!: boolean;
+  submitted: boolean = false;
 
   private lSub!: Subscription;
   private uSub!: Subscription;
@@ -82,29 +84,42 @@ export class NewPostComponent implements OnInit, OnDestroy {
               return of({});
             })
           )
-          .subscribe((post) => {
-            this.post = post;
+          .subscribe({
+            next: (post) => {
+              this.post = post;
 
-            this.postForm = this.fb.group({
-              title: [
-                this.post.title,
-                [Validators.required, Validators.minLength(5)],
-              ],
-              permalink: [this.post.permalink, [Validators.required]],
-              excerpt: [
-                this.post.excerpt,
-                [Validators.required, Validators.minLength(10)],
-              ],
-              category: [
-                `${this.post.category.categoryId}-${this.post.category.category}`,
-                [Validators.required],
-              ],
-              postImgUrl: ['', [Validators.required]],
-              content: [this.post.content, [Validators.required]],
-            });
+              if (this.post.category?.categoryId) {
+                this.postForm = this.fb.group({
+                  title: [
+                    this.post.title,
+                    [Validators.required, Validators.minLength(5)],
+                  ],
+                  permalink: [this.post.permalink, [Validators.required]],
+                  excerpt: [
+                    this.post.excerpt,
+                    [Validators.required, Validators.minLength(10)],
+                  ],
+                  category: [
+                    `${this.post.category?.categoryId}-${this.post.category?.category}`,
+                    [Validators.required],
+                  ],
+                  postImgUrl: ['', [Validators.required]],
+                  content: [this.post.content, [Validators.required]],
+                });
 
-            this.imgSrc = this.post.postImgUrl;
-            this.formStatus = 'Edit';
+                this.formStatus = 'Edit';
+
+                this.imgSrc = this.post.postImgUrl
+                  ? this.post.postImgUrl
+                  : './assets/placeholder-image.webp';
+              } else {
+                this.router.navigate(['**']);
+              }
+            },
+            error: (err) => {
+              this.toastr.error(err);
+              this.router.navigate(['**']);
+            },
           });
       });
   }
@@ -119,13 +134,18 @@ export class NewPostComponent implements OnInit, OnDestroy {
   }
 
   showPreview($event: any) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      this.imgSrc = e.target?.result;
-    };
+    if ($event.target.files.length) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.imgSrc = e.target?.result;
+      };
 
-    reader.readAsDataURL($event.target.files[0]);
-    this.selectedImg = $event.target.files[0];
+      reader.readAsDataURL($event.target.files[0]);
+      this.selectedImg = $event.target.files[0];
+    } else {
+      this.toastr.warning('Please select an image');
+      this.imgSrc = './assets/placeholder-image.webp';
+    }
   }
 
   onSubmit() {
@@ -133,6 +153,7 @@ export class NewPostComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.submitted = true;
     this.isLoading = true;
     const splitted = this.postForm.value.category.split('-');
 
@@ -162,25 +183,23 @@ export class NewPostComponent implements OnInit, OnDestroy {
           return of({});
         })
       )
-      .subscribe(() => {
-        this.toastr.success('Data insert successfully'),
-          this.router.navigate(['/posts']);
-        this.isLoading = false;
+      .subscribe({
+        next: () => {
+          this.toastr.success('Data insert successfully'),
+            this.router.navigate(['/posts']);
+          this.isLoading = false;
+          this.submitted = false;
+        },
+        error: () => {
+          this.toastr.error('Error insert data'), (this.submitted = false);
+        },
       });
   }
 
   ngOnDestroy(): void {
-    if (this.lSub) {
-      this.lSub.unsubscribe();
-    }
-    if (this.uSub) {
-      this.uSub.unsubscribe();
-    }
-    if (this.qSub) {
-      this.qSub.unsubscribe();
-    }
-    if (this.pSub) {
-      this.pSub.unsubscribe();
-    }
+    this.lSub ? this.lSub.unsubscribe() : null;
+    this.uSub ? this.uSub.unsubscribe() : null;
+    this.qSub ? this.qSub.unsubscribe() : null;
+    this.pSub ? this.pSub.unsubscribe() : null;
   }
 }

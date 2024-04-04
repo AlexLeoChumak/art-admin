@@ -3,6 +3,7 @@ import { FirebaseError } from '@angular/fire/app';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Subscription, catchError, throwError } from 'rxjs';
+
 import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
@@ -15,6 +16,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   isLoggedInGuard: boolean = false;
   isLoading!: boolean;
   isVisibilityPassword: boolean = false;
+  submitted: boolean = false;
 
   constructor(
     private authService: AuthService,
@@ -26,6 +28,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   onSubmit(form: { email: string; password: string }) {
     this.isLoading = true;
+    this.submitted = true;
 
     this.loginSub = this.authService
       .login(form.email, form.password)
@@ -40,10 +43,12 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.isLoggedInGuard = true;
           this.router.navigate(['/']);
           this.isLoading = false;
+          this.submitted = false;
         },
         error: (err) => {
           this.toastr.error(err);
           this.isLoading = false;
+          this.submitted = false;
         },
       });
   }

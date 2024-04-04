@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { collection, Firestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
+
 import { UserReg } from '../models/user-reg';
 import { HandlerDataService } from './handler-data.service';
 

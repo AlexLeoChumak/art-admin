@@ -60,7 +60,6 @@ export class HandlerDataService {
   }
 
   saveData(collection: any, data: any): Observable<any> {
-    // метод сохраняет данные в коллекцию Firestore
     return from(addDoc(collection, data)).pipe(
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);

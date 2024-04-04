@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
 import { Subscription, catchError, throwError } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+
 import { Post } from 'src/app/models/post';
 import { PostsService } from 'src/app/services/posts.service';
 
@@ -95,20 +96,10 @@ export class AllPostComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.lSub) {
-      this.lSub.unsubscribe();
-    }
-    if (this.dSub) {
-      this.dSub.unsubscribe();
-    }
-    if (this.iSub) {
-      this.iSub.unsubscribe();
-    }
-    if (this.fSub) {
-      this.fSub.unsubscribe();
-    }
-    if (this.mSub) {
-      this.mSub.unsubscribe();
-    }
+    this.lSub ? this.lSub.unsubscribe() : null;
+    this.dSub ? this.dSub.unsubscribe() : null;
+    this.iSub ? this.iSub.unsubscribe() : null;
+    this.fSub ? this.fSub.unsubscribe() : null;
+    this.mSub ? this.mSub.unsubscribe() : null;
   }
 }

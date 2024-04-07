@@ -45,9 +45,7 @@ export class HandlerDataService {
         },
         (err: FirestoreError) => {
           console.error(`Error: ${err}`);
-          observer.error(
-            `An error occurred while loading data. Please try again`
-          );
+          observer.error(err);
         }
       );
     }).pipe(
@@ -63,7 +61,7 @@ export class HandlerDataService {
     return from(addDoc(collection, data)).pipe(
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
-        return throwError(() => `Data insert error. Please try again`);
+        return throwError(() => err);
       })
     );
   }
@@ -72,7 +70,7 @@ export class HandlerDataService {
     return from(deleteDoc(doc(collection, id))).pipe(
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
-        return throwError(() => `Data delete error. Please try again`);
+        return throwError(() => err);
       })
     );
   }

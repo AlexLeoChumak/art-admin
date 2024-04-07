@@ -190,8 +190,8 @@ export class NewPostComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.submitted = false;
         },
-        error: () => {
-          this.toastr.error('Error insert data'), (this.submitted = false);
+        error: (err) => {
+          this.toastr.error(err), (this.submitted = false);
         },
       });
   }

@@ -37,7 +37,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
         next: (user) => {
           user ? (this.userEmail = user.email) : null;
         },
-        error: (err) => console.error(err),
+        error: (err) => {
+          console.error(err), this.toastr.error(err);
+        },
       });
 
     this.getStorageSub = this.storageService.getStorage().subscribe((res) => {

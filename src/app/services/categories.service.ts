@@ -42,7 +42,7 @@ export class CategoriesService {
     ).pipe(
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
-        return throwError(() => `Data update error. Please try again`);
+        return throwError(() => err);
       })
     );
   }

@@ -103,9 +103,9 @@ export class CategoriesComponent implements OnInit, OnDestroy {
         next: () => {
           this.toastr.success('Data update successfully');
           this.formStatus = 'Add';
-          formData.resetForm();
           this.isLoading = false;
           this.submitted = false;
+          formData.resetForm();
         },
         error: (err) => {
           this.toastr.error(err);

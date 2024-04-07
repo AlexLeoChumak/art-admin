@@ -66,7 +66,7 @@ export class PostsService {
       map(() => postData),
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
-        return throwError(() => `Data insert error. Please try again`);
+        return throwError(() => err);
       })
     );
   }
@@ -89,7 +89,7 @@ export class PostsService {
       }),
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
-        return throwError(() => `Data getting error. Please try again`);
+        return throwError(() => err);
       })
     );
   }
@@ -99,7 +99,7 @@ export class PostsService {
     return from(updateDoc(doc(this.postCollection, id), editedPost)).pipe(
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
-        return throwError(() => `Data update error. Please try again`);
+        return throwError(() => err);
       })
     );
   }
@@ -113,7 +113,7 @@ export class PostsService {
     ).pipe(
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
-        return throwError(() => `Data update error. Please try again`);
+        return throwError(() => err);
       })
     );
   }
@@ -142,7 +142,7 @@ export class PostsService {
       }),
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
-        throw new Error('Data delete error. Please try again');
+        throw new Error(`${err}`);
       })
     );
   }
@@ -152,7 +152,7 @@ export class PostsService {
     return from(deleteObject(ref(this.storage, postImgPath))).pipe(
       catchError((err: FirestoreError) => {
         console.error(`Error: ${err}`);
-        return throwError(() => `Image delete error. Please try again`);
+        return throwError(() => err);
       })
     );
   }
